@@ -5,11 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 def index(request):
-	data = {
-    	'rand_num': random.randint(1,100),
-    	'rand_name': ''.join(random.choices(string.ascii_letters, k=random.randint(5,10))),
-    }
-	return render(request, 'index.html', data)
+	return render(request, 'index.html')
 
 def articles(request):
 	return render(request, 'articles.html')
