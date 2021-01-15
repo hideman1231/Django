@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% load random_num %} <!-- Здесь нужно указывать название модуля -->
-{% load random_slug %}	<!-- Здесь нужно указывать название модуля -->
-
+{% load random %}
 {% block content %}
-	<div style="color: red">
-		<h4>index</h4>
-	</div>
-	<a href="{{ article|random_numbers }}">Случайная статья</a><br>
-	<a href="{{ article|random_numbers_slugs }}">Случайная статья со слагом</a><br>
+    <div style="color: red">
+        <h4>index</h4>
+    </div>
+    {% random_int 10 as rand_int %}
+    <a href="{% url 'article_num' rand_int %}">Случайная статья</a><br>
+    {% random_slug as rand_slug %}
+    <a href="{% url 'article_num' rand_int rand_slug %}">Случайная статья со слагом </a><br>
 {% endblock %}

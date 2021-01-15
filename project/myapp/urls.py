@@ -4,7 +4,7 @@ from .views import index, articles, articles_arhive, users, article, article_num
 urlpatterns = [
     path('', index, name='index'),
     path('articles/', articles, name='articles'),
-    path('articles/arhive/', articles_arhive, name='articles_arhive'),\
+    path('articles/arhive/', articles_arhive, name='articles_arhive'),
     path('users/', users, name='users'),
     path('article/', article, name='article'),
     path('article/<int:article_number>/', article_num, name='article_num'),
