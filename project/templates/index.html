@@ -4,8 +4,8 @@
     <div style="color: red">
         <h4>index</h4>
     </div>
-    {% random_int 10 as rand_int %}
+    {% random_int 100 as rand_int %}
     <a href="{% url 'article_num' rand_int %}">Случайная статья</a><br>
-    {% random_slug as rand_slug %}
+    {% random_slug 20 as rand_slug %}
     <a href="{% url 'article_num' rand_int rand_slug %}">Случайная статья со слагом </a><br>
 {% endblock %}
