@@ -23,7 +23,7 @@ class Comment(models.Model):
 
 	def __str__(self):
 		if self.comment:
-			return f'Comment for comment: {self.content[:10]} | {self.author} | {self.comment_created} | {CommentLike.objects.filter(like__article=self.article).count()} likes | {CommentDislike.objects.filter(dislike__article=self.article).count()} dislikes'
+			return f'Comment for comment: {self.content[:10]} | {self.author} | {self.comment_created} | {CommentLike.objects.filter(like__comment=self.comment).count()} likes | {CommentDislike.objects.filter(dislike__comment=self.comment).count()} dislikes'
 		else:
 			return f'Comment for article: {self.article.title} | {self.author} | {self.comment_created} | {CommentLike.objects.filter(like__article=self.article).count()} likes | {CommentDislike.objects.filter(dislike__article=self.article).count()} dislikes'
 
