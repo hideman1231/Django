@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title%}Главаная страница{% endblock %}
+
+{% block content %}
+	{% for el in form %}
+	<div>
+		{{ el }}
+	</div>
+	{% endfor %}
+{% endblock %}
