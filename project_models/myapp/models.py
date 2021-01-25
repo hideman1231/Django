@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 
 class Article(models.Model):
@@ -10,8 +11,18 @@ class Article(models.Model):
 	article_created = models.DateTimeField('article creation', default=timezone.now)
 	article_updated = models.DateTimeField('article update', auto_now=True)
 
+	class Meta:
+		ordering = ['-article_created']
+
+
 	def __str__(self):
 		return f'{self.title} | {self.author} | {self.article_created} | {ArticleLike.objects.filter(like__title=self.title).count()} likes | {ArticleDislike.objects.filter(dislike__title=self.title).count()} dislikes'
+
+
+	def save(self, **kwargs):
+		self.article_created = timezone.now() + relativedelta(years=-1)
+		super().save(**kwargs)
+
 
 class Comment(models.Model):
 	article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='article')

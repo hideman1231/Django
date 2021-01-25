@@ -1,0 +1,12 @@
+body {
+	background-color: #DCDCDC;
+}
+
+.title {
+	font-size: 27px;
+}
+
+.article_content {
+	word-wrap: break-word;
+}
+

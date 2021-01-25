@@ -2,9 +2,20 @@
 {% block title%}Главаная страница{% endblock %}
 
 {% block content %}
+	<div>
+		<a href="{% url 'createArticle' %}"><button class="btn btn-primary">Добавить статью</button></a><br>
+	</div>
 	{% for el in form %}
 	<div>
-		{{ el }}
+		<span class="title">{{ el.title }}</span><br>
+		<div class="article_content">{{ el.content|truncatechars:25 }}</div><br>
+		<span>{{ el.article_like.count }} Likes</span>
+		<span>{{ el.article_dislike.count }} Dislikes</span><br>
+		<a href="{% url 'articles' el.id %}"><button class="btn btn-success">Читать больше</button></a>
+		<a href="{% url 'updateArticle' el.id %}"><button class="btn btn-warning">Изменить</button></a>
+		<a href="{% url 'deleteArticle' el.id %}"><button class="btn btn-danger">Удалить</button></a>
+		<a href="{% url 'index' %}"><button class="btn btn-outline-success">Поставить лайк</button></a>
+		<a href="{% url 'index' %}"><button class="btn btn-outline-danger">Поставить дизлайк</button></a>
 	</div>
 	{% endfor %}
 {% endblock %}
