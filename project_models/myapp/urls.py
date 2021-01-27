@@ -1,12 +1,11 @@
 from django.urls import path
 
-from .views import index, articles, createArticle, updateArticle, deleteArticle
+from .views import CommentView, MyLoginView, MyRegisterView, LogoutUserView
 
 
 urlpatterns = [
-    path('', index, name='index'),
-    path('article/<int:article_id>/', articles, name='articles'),
-    path('article/create/', createArticle, name='createArticle'),
-    path('article/update/<int:article_id>', updateArticle, name='updateArticle'),
-    path('article/delete/<int:article_id>', deleteArticle, name='deleteArticle'),
+	path('', CommentView.as_view(), name='index'),
+    path('login/', MyLoginView.as_view(), name='login'),
+    path('register/', MyRegisterView.as_view(), name='register'),
+    path('logout/', LogoutUserView.as_view(), name='logout'),
 ]

@@ -1,50 +1,49 @@
 from django.shortcuts import render, redirect
 from .models import Article, Comment
-from .forms import ArticleForm
+from .forms import MyLoginForm, MyRegisterForm, ContentCommentsForm
+from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import CreateView, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 
 
-def index(request):
-	form = Article.objects.all()
-	return render(request, 'index.html', {'form': form})
-
-
-def articles(request, article_id):
-	form = Article.objects.get(id=article_id)
-	comments = form.article.all()
-	return render(request, 'articles.html', {'form': form, 'comments':comments})
-
-
-def createArticle(request):
-	if request.method == 'POST':
-		form = ArticleForm(request.POST)
+class CommentView(ListView):
+	model = Comment
+	form_class = ContentCommentsForm
+	template_name = 'index.html'
+	context_object_name = 'comment_list'
+	def get_queryset(self):
+		form = self.form_class(self.request.GET)
 		if form.is_valid():
-			form.save()
-			return redirect('/')
-	else:
-		form = ArticleForm()
-	return render(request, 'create.html', {'form': form})
+			return Comment.objects.filter(name__icontains=form.cleaned_data['content'])
+		return Comment.objects.all()
 
 
-def updateArticle(request, article_id):
-	article = Article.objects.get(id=article_id)
-	form = ArticleForm(instance=article)
-
-	if request.method == 'POST':
-		form = ArticleForm(request.POST, instance=article)
-		if form.is_valid():
-			form.save()
-			return redirect('/')
-
-	return render(request, 'update.html', {'form': form})
+class MyLoginView(LoginView):
+	template_name = 'req.html'
+	http_method_names = ['get', 'post']
+	form_class = MyLoginForm
+	success_url = '/'
+	def get_success_url(self):
+		return self.success_url
 
 
-def deleteArticle(request, article_id):
-	article = Article.objects.get(id=article_id)
+class MyRegisterView(CreateView):
+	model = User
+	form_class = MyRegisterForm
+	template_name = 'register.html'
+	success_url = '/'
 
-	if request.method == 'POST':
-		article.delete()
-		return redirect('/')
-	return render(request, 'delete.html', {'form': article})
+
+class LogoutUserView(LogoutView):
+	next_page = '/'
+
+
+
+
+
+
+
 
 
 

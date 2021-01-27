@@ -2,20 +2,16 @@
 {% block title%}Главаная страница{% endblock %}
 
 {% block content %}
-	<div>
-		<a href="{% url 'createArticle' %}"><button class="btn btn-primary">Добавить статью</button></a><br>
-	</div>
-	{% for el in form %}
-	<div>
-		<span class="title">{{ el.title }}</span><br>
-		<div class="article_content">{{ el.content|truncatechars:25 }}</div><br>
-		<span>{{ el.article_like.count }} Likes</span>
-		<span>{{ el.article_dislike.count }} Dislikes</span><br>
-		<a href="{% url 'articles' el.id %}"><button class="btn btn-success">Читать больше</button></a>
-		<a href="{% url 'updateArticle' el.id %}"><button class="btn btn-warning">Изменить</button></a>
-		<a href="{% url 'deleteArticle' el.id %}"><button class="btn btn-danger">Удалить</button></a>
-		<a href="{% url 'index' %}"><button class="btn btn-outline-success">Поставить лайк</button></a>
-		<a href="{% url 'index' %}"><button class="btn btn-outline-danger">Поставить дизлайк</button></a>
-	</div>
+	{{ form }}
+	{% for com in comment_list %}
+		{{ com }}<br>
 	{% endfor %}
+
+	{% if request.user.is_authenticate %}
+		{{ request.user }}
+		<a href="{% url 'logout' %}">Выйти</a>
+	{% else %}
+		<a href="{% url 'login' %}">Войти</a>
+		<a href="{% url 'register' %}">Зарегестрировать</a>
+	{% endif %}
 {% endblock %}
