@@ -28,7 +28,7 @@ def create_comment(request):
 		form = CommentForm(request.POST)
 		if form.is_valid():
 			print(form.cleaned_data)
-			print(form.cleaned_data.update({'author':author}))
+			form.cleaned_data.update({'author':author})
 			print(form.cleaned_data)
 			form.save()
 			return redirect('/')
