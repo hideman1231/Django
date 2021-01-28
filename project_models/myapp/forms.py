@@ -5,14 +5,13 @@ from .models import Comment
 
 
 class SearchCommentsForm(forms.Form):
-	content = forms.CharField(max_length=20)
+	content = forms.CharField(max_length=30)
 	my_comment = forms.BooleanField(required=False)
 
 
-class CommentForm(forms.ModelForm):
-	class Meta:
-		model = Comment
-		fields = ['article','content']
+class CommentForm(forms.Form):
+	article_title = forms.CharField(max_length=30)
+	content = forms.CharField(max_length=255)
 
 
 class MyLoginForm(AuthenticationForm, forms.ModelForm):

@@ -12,7 +12,7 @@ def my_comments(request):
 	if request.method == 'POST':
 		form = SearchCommentsForm(request.POST)
 		if form.is_valid():
-			if form.cleaned_data['my_comment'] is True:
+			if form.cleaned_data['my_comment']:
 				com = Comment.objects.filter(content__icontains=form.cleaned_data['content'], author=request.user)
 			else:
 				com = Comment.objects.filter(content__icontains=form.cleaned_data['content'])
@@ -23,15 +23,13 @@ def my_comments(request):
 
 def create_comment(request):
 	if request.method == 'POST':
+		try:
+			article = Article.objects.get(content=request.POST['article_title'])
+		except SomeModel.DoesNotExist:
+			return ''
 		author = request.user
-		print(author)
-		form = CommentForm(request.POST)
-		if form.is_valid():
-			print(form.cleaned_data)
-			form.cleaned_data.update({'author':author})
-			print(form.cleaned_data)
-			form.save()
-			return redirect('/')
+		Comment.objects.create(article=article,author=request.user, content=request.POST['content'])
+		return redirect('/')
 	else:
 		form = CommentForm()
 	return render(request, 'create_comment.html', {'form':form})
