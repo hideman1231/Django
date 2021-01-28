@@ -4,10 +4,15 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import Comment
 
 
-class ContentCommentsForm(forms.ModelForm):
+class SearchCommentsForm(forms.Form):
+	content = forms.CharField(max_length=20)
+	my_comment = forms.BooleanField(required=False)
+
+
+class CommentForm(forms.ModelForm):
 	class Meta:
 		model = Comment
-		fields = ['content']
+		fields = ['article','content']
 
 
 class MyLoginForm(AuthenticationForm, forms.ModelForm):
@@ -28,6 +33,20 @@ class MyRegisterForm(forms.ModelForm):
 		if commit:
 			user.save()
 		return user
+
+
+class UpdateUserForm(forms.ModelForm):
+	class Meta:
+		model = User
+		fields = ['password']
+	password = forms.CharField(
+		strip=False,
+        widget=forms.PasswordInput(attrs={'autofocus': True}),
+    )
+	def __init__(self, user, *args, **kwargs):
+		self.user = user
+		super().__init__(*args, **kwargs)
+
 
 
 
