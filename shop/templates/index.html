@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+	<div style="float: right;">
+	{% if request.user.is_authenticated %}
+		{% if request.user.is_superuser %}
+			<a href="{% url 'product_create' %}">Добавить товар</a>
+			<a href="{% url 'product_list' %}">Список товаров</a>
+			<a href="{% url 'product_return' %}">Список возврата</a>
+		{% else %}
+			<a href="{% url 'mypurchase' %}">Мои покупки</a>
+		{% endif %}
+		{{ request.user }}
+		Деньги: {{ request.user.wallet }}
+		<a href="{% url 'logout' %}">Выйти</a>
+	{% else %}
+		<a href="{% url 'login' %}">Авторизация</a>
+		<a href="{% url 'register' %}">Регистрация</a>	
+	{% endif %}
+	</div>
+	{% for product in object_list %}
+	<div>
+		<h4>{{ product }}</h4><br>
+		<h6>Описание: {{ product.description }}</h6><br>
+		<span>Цена за штуку: {{ product.price }}</span><br>
+		<span>Количество: {{ product.quantity }}</span><br>
+		{% if request.user.is_authenticated %}
+			{% if not request.user.is_superuser %}
+				<form method="post" action="{% url 'purchase_create' product.pk %}">
+					{% csrf_token %}
+					{{form_create_purchare.quantity}}
+					<input type="hidden" name="product_pk" value="{{product.pk}}">
+					<input type="submit" value="Купить" >
+				</form>
+			{% endif %}
+		{% endif %}
+	</div>
+	{% endfor %}
+{% endblock %}

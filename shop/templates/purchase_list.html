@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои покупки{% endblock %}
+
+{% block content %}
+	{% for purchases in purchase_list %}
+		<p>{{purchases}}</p>
+		<form method="Post" action="{% url 'return' %}">
+			{% csrf_token %}
+			<input type="hidden" name="purchases_pk" value="{{purchases.pk}}">
+			<input type="submit" value="Вернуть">
+		</form>
+	{% endfor %}
+{% endblock %}

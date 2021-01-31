@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Список товаров{% endblock %}
+
+{% block content %}
+	{% for product in object_list %}
+		<div>
+			<h4>{{ product }}</h4><br>
+			<h6>Описание: {{ product.description }}</h6><br>
+			<span>Цена за штуку: {{ product.price }}</span><br>
+			<span>Количество: {{ product.quantity }}</span><br>
+			<a href="{% url 'product_update' product.id %}">Изменить</a>
+		</div>
+	{% endfor %}
+{% endblock %}
