@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import MyRegisterForm, CreateProductsForm, CreatePurchaseForm, PurchaseReturnForm
 from .models import CustomUser, Product, Purchase, PurchaseReturn
@@ -6,7 +6,7 @@ from django.views.generic import ListView, DetailView, UpdateView, CreateView, D
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.utils import timezone
-
+from django.contrib import messages
 
 class LoginUserView(LoginView):
 	success_url = '/'
@@ -30,6 +30,8 @@ class ProductsView(ListView):
 	model = Product
 	template_name = 'index.html'
 	extra_context = {'form_create_purchare':CreatePurchaseForm}
+	ordering = '-id'
+	paginate_by = 3
 
 
 class CreateProductsView(CreateView):
@@ -42,6 +44,7 @@ class CreateProductsView(CreateView):
 class ProductListView(ListView):
 	model = Product
 	template_name = 'product_list.html'
+	ordering = '-id'
 
 
 class UpdateProductView(UpdateView):
@@ -67,12 +70,12 @@ class PurchasesView(CreateView):
 		product = Product.objects.get(id=self.request.POST['product_pk'])
 		object.product = product
 		suma = object.quantity * product.price
-		if self.request.user.wallet < suma:
-			# form.add_error('quantity','Не хватает денег')
-			# return super().form_invalid(form=form) Так не работает
-			raise ValidationError('Не хватает денег')
-		elif object.quantity > product.quantity:
-			raise ValidationError('Не хватает товара')
+		if object.quantity > product.quantity:
+			messages.error(self.request, 'Не хватает товара')
+			return redirect('/')
+		elif self.request.user.wallet < suma:
+			messages.error(self.request, 'Не хватает денег')
+			return redirect('/')
 		else:
 			product.quantity = product.quantity - object.quantity
 			product.save()
@@ -95,15 +98,17 @@ class PurchaseListView(ListView):
 class PurchaseReturnView(CreateView):
 	model = PurchaseReturn
 	template_name = 'return.html'
-	success_url = '/'
+	success_url = '/mypurchase/'
 	form_class = PurchaseReturnForm
 	def form_valid(self, form):
 		object = form.save(commit=False)
 		purchase = Purchase.objects.get(id=self.request.POST['purchases_pk'])
 		if PurchaseReturn.objects.filter(purchase=purchase):
-			raise ValidationError('Товар уже был отправлен на возврат')
+			messages.error(self.request, 'Товар уже был отправлен на возврат')
+			return redirect('/mypurchase/')
 		elif purchase.purchase_time + timedelta(minutes=3) < timezone.now():
-			raise ValidationError('Чувак не успел, 3 минуты прошло))')
+			messages.error(self.request, 'Чувак не успел, 3 минуты прошло))')
+			return redirect('/mypurchase/')
 		object.purchase = purchase
 		object.save()
 		return super().form_valid(form=form)

@@ -3,6 +3,11 @@
 {% block title %}Мои покупки{% endblock %}
 
 {% block content %}
+	{% if messages %}
+		{% for mes in messages %}
+			<h2>{{ mes|safe }}!!!</h2>
+		{% endfor %}
+	{% endif %}
 	{% for purchases in purchase_list %}
 		<p>{{purchases}}</p>
 		<form method="Post" action="{% url 'return' %}">
