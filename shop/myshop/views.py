@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
 
 class LoginUserView(LoginView):
 	success_url = '/'
@@ -34,27 +36,31 @@ class ProductsView(ListView):
 	paginate_by = 3
 
 
-class CreateProductsView(CreateView):
+class CreateProductsView(PermissionRequiredMixin, CreateView):
+	permission_required = 'is_superuser'
 	model = Product
 	form_class = CreateProductsForm
 	template_name = 'product_create.html'
 	success_url = '/'
 
 
-class ProductListView(ListView):
+class ProductListView(PermissionRequiredMixin, ListView):
+	permission_required = 'is_superuser'
 	model = Product
 	template_name = 'product_list.html'
 	ordering = '-id'
 
 
-class UpdateProductView(UpdateView):
+class UpdateProductView(PermissionRequiredMixin, UpdateView):
+	permission_required = 'is_superuser'
 	model = Product
 	template_name = 'product_update.html'
 	success_url = '/'
 	fields = '__all__'
 
 
-class ProductReturnListView(ListView):
+class ProductReturnListView(PermissionRequiredMixin, ListView):
+	permission_required = 'is_superuser'
 	model = PurchaseReturn
 	template_name = 'product_return.html'
 
@@ -79,7 +85,7 @@ class PurchasesView(CreateView):
 		else:
 			product.quantity = product.quantity - object.quantity
 			product.save()
-			user = CustomUser.objects.get(username=self.request.user)
+			user = self.request.user
 			user.wallet -= suma
 			user.save()
 		return super().form_valid(form=form)
@@ -90,9 +96,7 @@ class PurchaseListView(ListView):
 	template_name = 'purchase_list.html'
 	context_object_name = 'purchase_list'
 	def get_queryset(self):
-		super().get_queryset()
-		queryset = Purchase.objects.filter(buyer__username=self.request.user)
-		return queryset
+		return super().get_queryset().filter(buyer=self.request.user)
 
 
 class PurchaseReturnView(CreateView):
@@ -115,7 +119,8 @@ class PurchaseReturnView(CreateView):
 
 
 
-class PurchaseDeleteView(DeleteView):
+class PurchaseDeleteView(PermissionRequiredMixin, DeleteView):
+	permission_required = 'is_superuser'
 	model = Purchase
 	success_url = '/'
 	template_name = 'purchase_delete.html'
@@ -133,7 +138,8 @@ class PurchaseDeleteView(DeleteView):
 		return super().post(request, *args, **kwargs)
 
 
-class PurchaseReturnDeleteView(DeleteView):
+class PurchaseReturnDeleteView(PermissionRequiredMixin, DeleteView):
+	permission_required = 'is_superuser'
 	model = PurchaseReturn
 	success_url = '/'
 	template_name = 'delete_purchase_return.html'

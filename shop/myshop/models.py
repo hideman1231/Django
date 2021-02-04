@@ -41,10 +41,6 @@ class PurchaseReturn(models.Model):
 		return f'{self.purchase} | {self.return_time}'
 
 
-class Text(models.Model):
-	photo = models.ImageField()
-	body = models.CharField(max_length=20)
-
 
 
 

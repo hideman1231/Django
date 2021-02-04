@@ -33,7 +33,7 @@
 		<span>Количество: {{ product.quantity }}</span><br>
 		{% if request.user.is_authenticated %}
 			{% if not request.user.is_superuser %}
-				<form method="post" action="{% url 'purchase_create' product.pk %}">
+				<form method="post" action="{% url 'purchase_create' %}">
 					{% csrf_token %}
 					{{form_create_purchare.quantity}}
 					<input type="hidden" name="product_pk" value="{{product.pk}}">
