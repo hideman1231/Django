@@ -11,11 +11,11 @@
 			<input type="hidden" name="purchases_price" value="{{product_return.purchase.product.price}}">
 			<input type="hidden" name="purchases_quantity" value="{{product_return.purchase.quantity}}">
 			<input type="hidden" name="purchases_buyer" value="{{product_return.purchase.buyer.pk}}">
-    		<input type="submit" value="Принять">
+    		<input class="btn btn-success" type="submit" value="Принять">
 		</form>
 		<form method="post" action="{% url 'delete_purchase_return' product_return.pk %}">
 			{% csrf_token %}
-    		<input type="submit" value="Отклонить">
+    		<input class="btn btn-danger" type="submit" value="Отклонить">
 		</form>
 	{% endfor %}
 {% endblock %}

@@ -13,7 +13,7 @@
 		<form method="Post" action="{% url 'return' %}">
 			{% csrf_token %}
 			<input type="hidden" name="purchases_pk" value="{{purchases.pk}}">
-			<input type="submit" value="Вернуть">
+			<input class="btn btn-warning" type="submit" value="Вернуть">
 		</form>
 	{% endfor %}
 {% endblock %}

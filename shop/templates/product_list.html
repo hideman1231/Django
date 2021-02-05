@@ -9,7 +9,7 @@
 			<h6>Описание: {{ product.description }}</h6><br>
 			<span>Цена за штуку: {{ product.price }}</span><br>
 			<span>Количество: {{ product.quantity }}</span><br>
-			<a href="{% url 'product_update' product.id %}">Изменить</a>
+			<a class="btn btn-warning" href="{% url 'product_update' product.id %}">Изменить</a>
 		</div>
 	{% endfor %}
 {% endblock %}

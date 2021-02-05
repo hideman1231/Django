@@ -6,18 +6,18 @@
 	<div style="float: right;">
 	{% if request.user.is_authenticated %}
 		{% if request.user.is_superuser %}
-			<a href="{% url 'product_create' %}">Добавить товар</a>
-			<a href="{% url 'product_list' %}">Список товаров</a>
-			<a href="{% url 'product_return' %}">Список возврата</a>
+			<a class="btn btn-warning" href="{% url 'product_create' %}">Добавить товар</a>
+			<a class="btn btn-primary" href="{% url 'product_list' %}">Список товаров</a>
+			<a class="btn btn-primary" href="{% url 'product_return' %}">Список возврата</a>
 		{% else %}
-			<a href="{% url 'mypurchase' %}">Мои покупки</a>
+			<a class="btn btn-secondary" href="{% url 'mypurchase' %}">Мои покупки</a>
 		{% endif %}
 		{{ request.user }}
 		Деньги: {{ request.user.wallet }}
-		<a href="{% url 'logout' %}">Выйти</a>
+		<a class="btn btn-danger" href="{% url 'logout' %}">Выйти</a>
 	{% else %}
-		<a href="{% url 'login' %}">Авторизация</a>
-		<a href="{% url 'register' %}">Регистрация</a>	
+		<a class="btn btn-secondary" href="{% url 'login' %}">Авторизация</a>
+		<a class="btn btn-secondary" href="{% url 'register' %}">Регистрация</a>
 	{% endif %}
 	</div>
 	{% if messages %}
@@ -40,7 +40,7 @@
 					{% csrf_token %}
 					{{form_create_purchare.quantity}}
 					<input type="hidden" name="product_pk" value="{{product.pk}}">
-					<input type="submit" value="Купить" >
+					<input class="btn btn-warning" type="submit" value="Купить" >
 				</form>
 			{% endif %}
 		{% endif %}
