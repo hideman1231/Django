@@ -8,11 +8,19 @@ from datetime import timedelta
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=CustomUser)
+def my_handler(sender, **kwargs):
+	print('succes login')
 
 
 class LoginUserView(LoginView):
 	success_url = '/'
 	template_name = 'login.html'
+	
 	def get_success_url(self):
 		return self.success_url
 
@@ -70,6 +78,7 @@ class PurchasesView(CreateView):
 	form_class = CreatePurchaseForm
 	template_name = 'purchase_create.html'
 	success_url = '/'
+
 	def form_valid(self, form):
 		object = form.save(commit=False)
 		object.buyer = self.request.user
@@ -94,9 +103,16 @@ class PurchasesView(CreateView):
 class PurchaseListView(ListView):
 	model = Purchase
 	template_name = 'purchase_list.html'
-	context_object_name = 'purchase_list'
+	context_object_name = 'purchase_list' 
+
 	def get_queryset(self):
 		return super().get_queryset().filter(buyer=self.request.user)
+
+	def get_context_data(self, **kwargs):
+		click = self.request.session.get('click', 0)
+		click += 1
+		self.request.session['click'] = click
+		return super().get_context_data(click=click, **kwargs)
 
 
 class PurchaseReturnView(CreateView):
@@ -104,6 +120,7 @@ class PurchaseReturnView(CreateView):
 	template_name = 'return.html'
 	success_url = '/mypurchase/'
 	form_class = PurchaseReturnForm
+
 	def form_valid(self, form):
 		object = form.save(commit=False)
 		purchase = Purchase.objects.get(id=self.request.POST['purchases_pk'])
@@ -118,12 +135,12 @@ class PurchaseReturnView(CreateView):
 		return super().form_valid(form=form)
 
 
-
 class PurchaseDeleteView(PermissionRequiredMixin, DeleteView):
 	permission_required = 'is_superuser'
 	model = Purchase
 	success_url = '/'
 	template_name = 'purchase_delete.html'
+
 	def post(self, request, *args, **kwargs):
 		products_pk = self.request.POST['purchases_pk']
 		products_price = self.request.POST['purchases_price']
@@ -143,17 +160,4 @@ class PurchaseReturnDeleteView(PermissionRequiredMixin, DeleteView):
 	model = PurchaseReturn
 	success_url = '/'
 	template_name = 'delete_purchase_return.html'
-
-
-
-
-
-
-
-
-
-
-
-
-
 
