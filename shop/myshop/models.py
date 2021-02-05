@@ -9,6 +9,7 @@ class CustomUser(AbstractUser):
 
 class Product(models.Model):
 	name = models.CharField(max_length=50)
+	photo = models.ImageField(null=True)
 	description = models.TextField()
 	price = models.PositiveIntegerField()
 	quantity = models.PositiveSmallIntegerField()

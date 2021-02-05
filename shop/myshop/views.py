@@ -3,7 +3,6 @@ from django.contrib.auth.views import LoginView, LogoutView
 from .forms import MyRegisterForm, CreateProductsForm, CreatePurchaseForm, PurchaseReturnForm
 from .models import CustomUser, Product, Purchase, PurchaseReturn
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
-from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib import messages
@@ -99,6 +98,9 @@ class PurchasesView(CreateView):
 			user.save()
 		return super().form_valid(form=form)
 
+	def form_invalid(self, form):
+		messages.error(self.request, 'Укажите количество')
+		return redirect('/')
 
 class PurchaseListView(ListView):
 	model = Purchase

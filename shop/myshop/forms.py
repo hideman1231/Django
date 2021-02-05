@@ -1,5 +1,7 @@
 from .models import CustomUser, Product, Purchase, PurchaseReturn
 from django import forms
+# from django.core.exceptions import ValidationError
+from django.shortcuts import redirect
 
 
 class MyRegisterForm(forms.ModelForm):
@@ -28,6 +30,12 @@ class CreatePurchaseForm(forms.ModelForm):
 	class Meta:
 		model = Purchase
 		fields = ['quantity']
+
+	def clean_quantity(self):
+		data = self.cleaned_data.get('quantity')
+		if data == 0:
+			raise forms.ValidationError('Выберите количество')
+		return data
 
 
 class PurchaseReturnForm(forms.ModelForm):

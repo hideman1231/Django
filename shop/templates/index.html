@@ -22,12 +22,15 @@
 	</div>
 	{% if messages %}
 		{% for mes in messages %}
-			<h2>{{ mes|safe }}!!!</h2>
+			<h2 style="color: red">{{ mes|safe }}!!!</h2>
 		{% endfor %}
 	{% endif %}
 	{% for product in object_list %}
 	<div>
 		<h4>{{ product }}</h4><br>
+		{% if product.photo %}
+			<img src="media/{{product.photo}}" width="250px" height="300px">
+		{% endif %}
 		<h6>Описание: {{ product.description }}</h6><br>
 		<span>Цена за штуку: {{ product.price }}</span><br>
 		<span>Количество: {{ product.quantity }}</span><br>
