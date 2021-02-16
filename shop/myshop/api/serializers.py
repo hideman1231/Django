@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from myshop.models import CustomUser, Product, Purchase
+from myshop.models import CustomUser, Product, Purchase, Author, Book
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
-
+from rest_framework.validators import UniqueTogetherValidator
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,3 +57,35 @@ class PurchaseSerializer(serializers.ModelSerializer):
         product, created  = Product.objects.get_or_create(**product_data)
         purchase = Purchase.objects.create(buyer=buyer, product=product, **validated_data)
         return purchase
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    books = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Author
+        fields = ['name', 'age', 'books']
+
+
+class BookSerializer(serializers.ModelSerializer):  
+    author = AuthorSerializer()
+
+    class Meta:
+        model = Book
+        fields = ['author', 'title', 'page']
+        validators = [
+            UniqueTogetherValidator(
+                queryset = Book.objects.all(),
+                fields = ['title']
+            )
+        ]
+
+    def create(self, validated_data):
+        author_data = validated_data.pop('author')
+        title_data = validated_data.pop('title')
+        title = title_data + '!'
+        if Author.objects.filter(name=author_data['name'], age=author_data['age']):
+            author = Author.objects.get(**author_data)
+        else:
+            author = Author.objects.create(**author_data)
+        return Book.objects.create(author=author, title=title, **validated_data)

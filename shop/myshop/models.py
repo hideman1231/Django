@@ -42,6 +42,16 @@ class PurchaseReturn(models.Model):
 		return f'{self.purchase} | {self.return_time}'
 
 
+class Author(models.Model):
+    name = models.CharField(max_length=50)
+    age = models.PositiveSmallIntegerField()
+
+
+class Book(models.Model):
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')
+    title = models.CharField(max_length=50)
+    page = models.PositiveSmallIntegerField()
+
 
 
 

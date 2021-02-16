@@ -1,8 +1,16 @@
-from django.urls import path
+from django.urls import path, include
 from .views import ProductsView, LoginUserView, LogoutUserView, RegisterUserView, CreateProductsView, ProductListView, UpdateProductView, ProductReturnListView, PurchasesView, PurchaseListView, PurchaseReturnView, PurchaseDeleteView, PurchaseReturnDeleteView
+from myshop.api.resources import AuthorViewSet, BookViewSet
+from rest_framework import routers
+
+
+router = routers.SimpleRouter()
+router.register(r'authors', AuthorViewSet)
+router.register(r'books', BookViewSet)
 
 urlpatterns = [
 	path('', ProductsView.as_view(), name='index'),
+	path('api/', include(router.urls)),
 	path('login/', LoginUserView.as_view(), name='login'),
 	path('logout/', LogoutUserView.as_view(), name='logout'),
 	path('register/', RegisterUserView.as_view(), name='register'),
