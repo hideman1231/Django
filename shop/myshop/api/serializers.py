@@ -8,7 +8,7 @@ from rest_framework.validators import UniqueTogetherValidator
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username','password','wallet']
+        fields = ['username', 'password', 'wallet']
         write_only_fields = ('password',)
         extra_kwargs = {
             'username': {
@@ -35,7 +35,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name','description','price','quantity']
+        fields = ['name', 'description', 'price', 'quantity']
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
@@ -44,7 +44,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Purchase
-        fields = ['buyer','product','quantity']
+        fields = ['buyer', 'product', 'quantity']
 
     def create(self, validated_data):
         buyer_data = validated_data.pop('buyer')
@@ -55,8 +55,9 @@ class PurchaseSerializer(serializers.ModelSerializer):
             buyer = CustomUser(**buyer_data)
             buyer.set_password(buyer_data['password'])
             buyer.save()
-        product, created  = Product.objects.get_or_create(**product_data)
-        purchase = Purchase.objects.create(buyer=buyer, product=product, **validated_data)
+        product, created = Product.objects.get_or_create(**product_data)
+        purchase = Purchase.objects.create(
+            buyer=buyer, product=product, **validated_data)
         return purchase
 
 
@@ -67,7 +68,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         fields = ['name', 'age']
 
 
-class BookSerializer(serializers.ModelSerializer):  
+class BookSerializer(serializers.ModelSerializer):
     author = AuthorSerializer()
 
     class Meta:
@@ -75,8 +76,8 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ['author', 'title', 'page']
         validators = [
             UniqueTogetherValidator(
-                queryset = Book.objects.all(),
-                fields = ['title']
+                queryset=Book.objects.all(),
+                fields=['title']
             )
         ]
 
@@ -84,12 +85,8 @@ class BookSerializer(serializers.ModelSerializer):
         author_data = validated_data.pop('author')
         title_data = validated_data.pop('title')
         title = title_data + '!'
-        if Author.objects.filter(name=author_data['name'], age=author_data['age']):
-            author = Author.objects.get(**author_data)
-        else:
-            author = Author.objects.create(**author_data)
+        author, created = Author.objects.get_or_create(**author_data)
         return Book.objects.create(author=author, title=title, **validated_data)
-
 
 
 class AuthorBookSerializer(serializers.ModelSerializer):
@@ -98,5 +95,3 @@ class AuthorBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ['books']
-
-
