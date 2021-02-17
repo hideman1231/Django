@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework.validators import UniqueTogetherValidator
 
+
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -60,11 +61,10 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    books = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Author
-        fields = ['name', 'age', 'books']
+        fields = ['name', 'age']
 
 
 class BookSerializer(serializers.ModelSerializer):  
@@ -89,3 +89,14 @@ class BookSerializer(serializers.ModelSerializer):
         else:
             author = Author.objects.create(**author_data)
         return Book.objects.create(author=author, title=title, **validated_data)
+
+
+
+class AuthorBookSerializer(serializers.ModelSerializer):
+    books = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Author
+        fields = ['books']
+
+
