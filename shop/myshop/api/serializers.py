@@ -1,29 +1,18 @@
 from rest_framework import serializers
-from myshop.models import CustomUser, Product, Purchase, Author, Book
+from myshop.models import CustomUser, Product, Purchase, Author, Book, PurchaseReturn
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework.validators import UniqueTogetherValidator
+from django.utils import timezone
+from datetime import timedelta
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = CustomUser
         fields = ['username', 'password', 'wallet']
         write_only_fields = ('password',)
-        extra_kwargs = {
-            'username': {
-                'validators': [UnicodeUsernameValidator()],
-            }
-        }
-
-    # def create(self, validated_data):
-    #     user = CustomUser(
-    #         username = validated_data['username'],
-    #         wallet = validated_data['wallet'],
-    #         password = make_password(validated_data['password']),
-    #         )
-    #     user.save()
-    #     return user
 
     def create(self, validated_data):
         user = super().create(validated_data)
@@ -33,32 +22,44 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Product
         fields = ['name', 'description', 'price', 'quantity']
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
-    buyer = CustomUserSerializer()
-    product = ProductSerializer()
 
     class Meta:
         model = Purchase
-        fields = ['buyer', 'product', 'quantity']
+        fields = ['product', 'quantity']
 
-    def create(self, validated_data):
-        buyer_data = validated_data.pop('buyer')
-        product_data = validated_data.pop('product')
-        if CustomUser.objects.filter(username=buyer_data['username']):
-            buyer = CustomUser.objects.get(**buyer_data)
+    def validate(self, data):
+        if data['product'].quantity < data['quantity']:
+            raise serializers.ValidationError('Товара не хватает') 
+        elif data['product'].price * data['quantity'] > self.context['request'].user.wallet:
+            raise serializers.ValidationError('У вас не хватает зелени')
+        return data
+
+
+
+class PurchaseReturnSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PurchaseReturn
+        fields = ['purchase', 'return_time']
+        read_only = ('return_time', )
+
+
+    def validate_purchase(self, value):
+        if value.buyer == self.context['request'].user:
+            if PurchaseReturn.objects.filter(purchase=value):
+                raise serializers.ValidationError('Чувак ты уже отправлял это товар на возврат')
+            elif value.purchase_time + timedelta(minutes=3) < timezone.now():
+                raise serializers.ValidationError('Время вышло, раньше думать нужно)')
         else:
-            buyer = CustomUser(**buyer_data)
-            buyer.set_password(buyer_data['password'])
-            buyer.save()
-        product, created = Product.objects.get_or_create(**product_data)
-        purchase = Purchase.objects.create(
-            buyer=buyer, product=product, **validated_data)
-        return purchase
+            raise serializers.ValidationError('Это не твоя покупка!')
+        return value
 
 
 class AuthorSerializer(serializers.ModelSerializer):
