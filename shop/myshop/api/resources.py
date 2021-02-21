@@ -8,31 +8,19 @@ from myshop.api.serializers import (AuthorSerializer, BookSerializer, AuthorBook
                                     CustomUserSerializer, PurchaseSerializer, PurchaseReturnSerializer)
 from rest_framework.views import APIView
 from rest_framework import permissions
-from django.utils import timezone
-from datetime import timedelta
-from rest_framework.authentication import TokenAuthentication
-from rest_framework import exceptions
 from django.dispatch import receiver
 from django.conf import settings
 from django.db.models.signals import post_save
 from rest_framework.authtoken.models import Token
+from django.utils import timezone
+from datetime import timedelta
+
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-
-
-# class CustomTokenAuthentication(TokenAuthentication):
-#     pass
-    # model = CustomToken
-
-    # def authenticate_credentials(self, key):
-    #     user, token = super().authenticate_credentials(key)
-    #     if timezone.now() > token.created + timedelta(minutes=10):
-    #         raise exceptions.AuthenticationFailed('Токену габела, 10 мин прошло')
-    #     return user, token
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -78,8 +66,9 @@ class ExampleView(APIView):
     def get(self, request, format=None):
         content = {
             'user': str(request.user),
-            'auth': str(request.auth),
-            'token_time': str(request.auth.created < timezone.now() + timedelta(minutes=10))
+            'token': str(request.auth),
+            'token_created': str(request.auth.created),
+            'token_is_dead': request.auth.created + timedelta(minutes=10),
         }
         return Response(content)
 
