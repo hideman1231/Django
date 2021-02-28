@@ -11,9 +11,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-@receiver(post_save, sender=CustomUser)
-def my_handler(sender, **kwargs):
-    print('succes register')
+# @receiver(post_save, sender=CustomUser)
+# def my_handler(sender, **kwargs):
+#     print('succes register')
 
 
 class LoginUserView(LoginView):
@@ -33,7 +33,6 @@ class RegisterUserView(CreateView):
     form_class = MyRegisterForm
     template_name = 'register.html'
     success_url = '/'
-
 
 class ProductsView(ListView):
     model = Product

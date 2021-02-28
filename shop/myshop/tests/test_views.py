@@ -187,3 +187,38 @@ class UpdateProductViewTest(TestCase):
     def test_update_product_succes(self):
         pass
 
+
+class ProductReturnListViewTest(TestCase):
+
+    def setUp(self):
+        self.user = CustomUser.objects.create(username='abc', password='123')
+        self.url = reverse('product_return')
+
+    def product_return_get_succes(self):
+        self.user.is_superuser = True
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product_return.html')
+
+    def product_return_get_failure(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+
+class PurchasesViewTest(TestCase):
+
+    def setUp(self):
+        self.user = CustomUser.objects.create(username='abc', password='123')
+        self.url = reverse('product_return')
+
+    def purchase_create_get_succes(self):
+        self.user.is_superuser = True
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+
+
+
