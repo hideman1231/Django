@@ -13,7 +13,7 @@ from django.dispatch import receiver
 
 @receiver(post_save, sender=CustomUser)
 def my_handler(sender, **kwargs):
-    print('succes login')
+    print('succes register')
 
 
 class LoginUserView(LoginView):
