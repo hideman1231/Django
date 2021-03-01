@@ -6,7 +6,7 @@ from django.views.generic import ListView, DetailView, UpdateView, CreateView, D
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -102,7 +102,7 @@ class PurchasesView(CreateView):
         return redirect('/')
 
 
-class PurchaseListView(ListView):
+class PurchaseListView(LoginRequiredMixin, ListView):
     model = Purchase
     template_name = 'purchase_list.html'
     context_object_name = 'purchase_list'
@@ -117,7 +117,7 @@ class PurchaseListView(ListView):
         return super().get_context_data(click=click, **kwargs)
 
 
-class PurchaseReturnView(CreateView):
+class PurchaseReturnView(LoginRequiredMixin, CreateView):
     model = PurchaseReturn
     template_name = 'return.html'
     success_url = '/mypurchase/'
@@ -126,11 +126,14 @@ class PurchaseReturnView(CreateView):
     def form_valid(self, form):
         object = form.save(commit=False)
         purchase = Purchase.objects.get(id=self.request.POST['purchases_pk'])
-        if PurchaseReturn.objects.filter(purchase=purchase):
-            messages.error(self.request, 'Товар уже был отправлен на возврат')
-            return redirect('/mypurchase/')
-        elif purchase.purchase_time + timedelta(minutes=3) < timezone.now():
-            messages.error(self.request, 'Чувак не успел, 3 минуты прошло))')
+        if purchase.buyer == self.request.user:
+            if PurchaseReturn.objects.filter(purchase=purchase):
+                messages.error(self.request, 'Товар уже был отправлен на возврат')
+                return redirect('/mypurchase/')
+            elif purchase.purchase_time + timedelta(minutes=3) < timezone.now():
+                messages.error(self.request, 'Чувак не успел, 3 минуты прошло))')
+                return redirect('/mypurchase/')
+        else:
             return redirect('/mypurchase/')
         object.purchase = purchase
         object.save()

@@ -24,6 +24,10 @@ class CreateProductsForm(forms.ModelForm):
         model = Product
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['photo'].required = False
+
 
 class CreatePurchaseForm(forms.ModelForm):
     class Meta:
