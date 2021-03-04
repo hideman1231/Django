@@ -1,12 +1,12 @@
 from django.urls import path, include
-from .views import (ProductsView, LoginUserView, LogoutUserView, 
-                    RegisterUserView, CreateProductsView, ProductListView, 
-                    UpdateProductView, ProductReturnListView, PurchasesView, 
-                    PurchaseListView, PurchaseReturnView, PurchaseDeleteView, 
+from .views import (ProductsView, LoginUserView, LogoutUserView,
+                    RegisterUserView, CreateProductsView, ProductListView,
+                    UpdateProductView, ProductReturnListView, PurchasesView,
+                    PurchaseListView, PurchaseReturnView, PurchaseDeleteView,
                     PurchaseReturnDeleteView)
-from myshop.api.resources import (AuthorViewSet, BookViewSet, ExampleView, 
-                                CustomUserViewSet, PurchaseViewSet, 
-                                PurchaseReturnViewSet)
+from myshop.api.resources import (AuthorViewSet, BookViewSet, ExampleView,
+                                  CustomUserViewSet, PurchaseViewSet,
+                                  PurchaseReturnViewSet)
 from rest_framework import routers
 from rest_framework.authtoken import views
 
@@ -14,9 +14,9 @@ from rest_framework.authtoken import views
 router = routers.SimpleRouter()
 router.register(r'authors', AuthorViewSet)
 router.register(r'books', BookViewSet)
-router.register(r'users', CustomUserViewSet)
-router.register(r'purchases', PurchaseViewSet)
-router.register(r'purchase_returns', PurchaseReturnViewSet)
+router.register(r'users', CustomUserViewSet, basename='users')
+router.register(r'purchases', PurchaseViewSet, basename='purchases')
+router.register(r'purchase_returns', PurchaseReturnViewSet, basename='purchase_returns')
 
 
 urlpatterns = [

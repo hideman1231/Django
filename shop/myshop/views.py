@@ -34,6 +34,7 @@ class RegisterUserView(CreateView):
     template_name = 'register.html'
     success_url = '/'
 
+
 class ProductsView(ListView):
     model = Product
     template_name = 'index.html'
@@ -128,10 +129,12 @@ class PurchaseReturnView(LoginRequiredMixin, CreateView):
         purchase = Purchase.objects.get(id=self.request.POST['purchases_pk'])
         if purchase.buyer == self.request.user:
             if PurchaseReturn.objects.filter(purchase=purchase):
-                messages.error(self.request, 'Товар уже был отправлен на возврат')
+                messages.error(
+                    self.request, 'Товар уже был отправлен на возврат')
                 return redirect('/mypurchase/')
             elif purchase.purchase_time + timedelta(minutes=3) < timezone.now():
-                messages.error(self.request, 'Чувак не успел, 3 минуты прошло))')
+                messages.error(
+                    self.request, 'Чувак не успел, 3 минуты прошло))')
                 return redirect('/mypurchase/')
         else:
             return redirect('/mypurchase/')

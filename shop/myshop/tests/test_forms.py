@@ -7,4 +7,3 @@ class CreatePurchaseFormTest(TestCase):
         form_data = {'quantity': 0}
         form = CreatePurchaseForm(data=form_data)
         self.assertFalse(form.is_valid())
-

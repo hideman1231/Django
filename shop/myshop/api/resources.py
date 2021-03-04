@@ -32,14 +32,15 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         product = Product.objects.get(id=self.request.data['product'])
-        suma = self.request.data['quantity'] * product.price
+        suma = int(self.request.data['quantity']) * product.price
         user = self.request.user
         user.wallet -= suma
         user.save()
-        product.quantity -= self.request.data['quantity']
+        product.quantity -= int(self.request.data['quantity'])
         product.save()
         serializer.save(buyer=user)
 
@@ -47,10 +48,11 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 class PurchaseReturnViewSet(viewsets.ModelViewSet):
     queryset = PurchaseReturn.objects.all()
     serializer_class = PurchaseReturnSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         user = self.request.user
-        purchase = Purchase.objects.get(id=self.request.data['purchase'])
+        purchase = Purchase.objects.get(id=int(self.request.data['purchase']))
         product = Product.objects.get(id=purchase.product.id)
         suma = product.price * purchase.quantity
         user.wallet += suma
@@ -58,7 +60,7 @@ class PurchaseReturnViewSet(viewsets.ModelViewSet):
         user.save()
         product.save()
         serializer.save()
-        purchase.delete()
+        # purchase.delete()
 
 
 class ExampleView(APIView):

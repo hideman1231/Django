@@ -19,8 +19,10 @@ class Product(models.Model):
 
 
 class Purchase(models.Model):
-    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='buyers')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='products')
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              on_delete=models.CASCADE, verbose_name='buyers')
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, verbose_name='products')
     quantity = models.PositiveSmallIntegerField()
     purchase_time = models.DateTimeField(auto_now_add=True)
 
@@ -32,7 +34,8 @@ class Purchase(models.Model):
 
 
 class PurchaseReturn(models.Model):
-    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, verbose_name='purchases')
+    purchase = models.ForeignKey(
+        Purchase, on_delete=models.CASCADE, verbose_name='purchases')
     return_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -48,14 +51,7 @@ class Author(models.Model):
 
 
 class Book(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')
+    author = models.ForeignKey(
+        Author, on_delete=models.CASCADE, related_name='books')
     title = models.CharField(max_length=50)
     page = models.PositiveSmallIntegerField()
-
-
-
-
-
-
-
-
