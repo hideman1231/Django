@@ -33,6 +33,8 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post', 'create']
+
 
     def perform_create(self, serializer):
         product = Product.objects.get(id=self.request.data['product'])
@@ -49,6 +51,7 @@ class PurchaseReturnViewSet(viewsets.ModelViewSet):
     queryset = PurchaseReturn.objects.all()
     serializer_class = PurchaseReturnSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post', 'create']
 
     def perform_create(self, serializer):
         user = self.request.user
