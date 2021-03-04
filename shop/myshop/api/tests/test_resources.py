@@ -16,28 +16,27 @@ class CustomUserViewSetTest(APITestCase):
         self.user2 = CustomUser.objects.create(username='A2', password='13')
         self.user3 = CustomUser.objects.create(username='A3', password='3')
         self.user4 = CustomUser.objects.create(username='A4', password='1')
+        self.client.force_authenticate(user=self.user1)
 
     def test_user_no_login(self):
+        self.client.logout()
         url = reverse('users-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 401)
 
     def test_user_list(self):
         url = reverse('users-list')
-        self.client.force_authenticate(user=self.user1)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(len(response.data), CustomUser.objects.count())
 
     def test_user_retrieve(self):
         url = reverse('users-detail', kwargs={'pk': self.user3.pk})
-        self.client.force_authenticate(user=self.user1)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_user_create_succes(self):
         url = reverse('users-list')
-        self.client.force_authenticate(user=self.user1)
         data = {'username':'aa', 'password':'164', 'wallet':'1000'}
         response = self.client.post(url, data)
         username = CustomUser.objects.all().last().username
@@ -46,14 +45,12 @@ class CustomUserViewSetTest(APITestCase):
 
     def test_user_create_failure(self):
         url = reverse('users-list')
-        self.client.force_authenticate(user=self.user1)
         data = {'username':'aa','wallet':'1000'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 400)
 
     def test_user_patch(self):
         url = reverse('users-detail', kwargs={'pk': self.user4.pk})
-        self.client.force_authenticate(user=self.user1)
         data = {'username':'nea4'}
         response = self.client.patch(url, data)
         username = CustomUser.objects.get(id=self.user4.pk).username
@@ -62,7 +59,6 @@ class CustomUserViewSetTest(APITestCase):
 
     def test_user_put(self):
         url = reverse('users-detail', kwargs={'pk': self.user4.pk})
-        self.client.force_authenticate(user=self.user1)
         data = {'username':'nea4', 'password':'123', 'wallet':2000}
         response = self.client.put(url, data)
         username = CustomUser.objects.get(id=self.user4.pk).username
@@ -75,7 +71,6 @@ class CustomUserViewSetTest(APITestCase):
 
     def test_user_destroy(self):
         url = reverse('users-detail', args=[self.user2.pk])
-        self.client.force_authenticate(user=self.user1)
         response = self.client.put(url)
 
 class PurchaseViewSetTest(APITestCase):
@@ -87,28 +82,27 @@ class PurchaseViewSetTest(APITestCase):
         self.product2 = Product.objects.create(name='bb0', description='weweff', price=10, quantity=300) 
         self.purchase1 = Purchase.objects.create(buyer=self.user, product=self.product1, quantity=2)
         self.purchase2 = Purchase.objects.create(buyer=self.user, product=self.product2, quantity=5)
+        self.client.force_authenticate(user=self.user)
 
     def test_purchase_no_login(self):
+        self.client.logout()
         url = reverse('purchases-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 401)
 
     def test_purchase_list(self):
         url = reverse('purchases-list')
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(len(response.data), Purchase.objects.count())
 
     def test_purchase_retrieve(self):
         url = reverse('purchases-detail', kwargs={'pk':self.purchase1.pk})
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_purchase_create_succes(self):
         url = reverse('purchases-list')
-        self.client.force_authenticate(user=self.user)
         data = {'product':self.product2.pk, 'quantity':7}
         response = self.client.post(url, data)
         product_quantity = Product.objects.get(id=response.data['product']).quantity
@@ -120,7 +114,6 @@ class PurchaseViewSetTest(APITestCase):
 
     def test_purchase_create_failure_not_enough_product(self):
         url = reverse('purchases-list')
-        self.client.force_authenticate(user=self.user)
         data = {'product':self.product2.pk, 'quantity':700}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 400)
@@ -128,7 +121,6 @@ class PurchaseViewSetTest(APITestCase):
 
     def test_purchase_create_failure_not_enough_money(self):
         url = reverse('purchases-list')
-        self.client.force_authenticate(user=self.user)
         data = {'product':self.product1.pk, 'quantity':100}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 400)
@@ -148,35 +140,33 @@ class PurchaseReturnViewSet(APITestCase):
         self.purchase3 = Purchase.objects.create(buyer=self.user1, product=self.product2, quantity=5)
         self.purchase_return1 = PurchaseReturn.objects.create(purchase=self.purchase1)
         self.purchase_return2 = PurchaseReturn.objects.create(purchase=self.purchase2)
+        self.client.force_authenticate(user=self.user1)
 
     def test_purchase_no_login(self):
+        self.client.logout()
         url = reverse('purchase_returns-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 401)
 
     def test_purchase_return_list(self):
         url = reverse('purchase_returns-list')
-        self.client.force_authenticate(user=self.user1)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(len(response.data), PurchaseReturn.objects.count())
 
     def test_purchase_return_retrieve(self):
         url = reverse('purchase_returns-detail', args=[self.purchase_return1.pk])
-        self.client.force_authenticate(user=self.user1)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_purchase_return_create(self):
         url = reverse('purchase_returns-list')
-        self.client.force_authenticate(user=self.user1)
         data = {'purchase':self.purchase3.pk}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_purchase_return_create_another_user(self):
         url = reverse('purchase_returns-list')
-        self.client.force_authenticate(user=self.user1)
         data = {'purchase':self.purchase2.pk}
         response = self.client.post(url, data)
         self.assertIn('Это не твоя покупка!', response.data['purchase'])
@@ -184,7 +174,6 @@ class PurchaseReturnViewSet(APITestCase):
 
     def test_purchase_return_create_resending(self):
         url = reverse('purchase_returns-list')
-        self.client.force_authenticate(user=self.user1)
         data = {'purchase':self.purchase3.pk}
         self.client.post(url, data)
         response = self.client.post(url, data)
