@@ -4,21 +4,35 @@
 
 {% block content %}
     {% if user.is_authenticated %}
+        {{user}}
+        {{free_plases}}
         <a href="{% url 'logout' %}">Выйти</a>
         {% if user.is_superuser %}
             <a href="{% url 'create_cinema_hall' %}">Создать зал</a>
             <a href="{% url 'create_session' %}">Создать сеанс</a>
         {% endif %}
+        <a href="{% url 'purchases' %}">Покупки</a>
     {% else %}
         <a href="{% url 'login' %}">Войти</a>
         <a href="{% url 'register' %}">Зарегистрироваться</a>
     {% endif %}
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{message|safe}}</p>
+        {% endfor %}
+    {% endif %}
     {% for session in sessions %}
         <div>
-            <p>Зал: {{session.hall.name}}<p><br>
-            Свободных мест: {{session.hall.size}}<br>
-            Дата показа: {{session.show_date}}<br>
-            Цена билета: {{session.price}}<br>
+            <form method="post" action="{% url 'create_ticket' %}">
+                {% csrf_token %}
+                <p>Зал: {{session.hall.name}}<p><br>
+                Свободных мест: {{free_plases}}<br>
+                Дата показа: {{session.show_date}}<br>
+                Цена билета: {{session.price}}<br>
+                {{quantity.quantity}}
+                <input type="hidden" name="session" value='{{session.pk}}'>
+                <input type="submit" value="Купить">
+            </form>
         </div>
     {% endfor %}
 {% endblock %}

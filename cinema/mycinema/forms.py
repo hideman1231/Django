@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from mycinema.models import MyUser, CinemaHall, Session, Ticket
 from django import forms
+from django.utils import timezone
 
 class MyUserCreationForm(UserCreationForm):
     class Meta:
@@ -23,9 +24,25 @@ class CreateSessionForm(forms.ModelForm):
             'end_time': forms.DateInput(attrs={'type': 'date'}),
         }
 
-    def clean_hall(self):
-        data = self.cleaned_data.get('hall')
-        if data in [s.hall for s in Session.objects.all()]:
-            return forms.ValidationError('Этот зал уже занят')
-        return data
+    def clean(self):
+        cleaned_data = super().clean()
+        hall = cleaned_data['hall']
+        session = CinemaHall.objects.get(id=hall.pk).sessions.last()
+        print(session)
+        start_time = cleaned_data['start_time']
+        end_time = cleaned_data['end_time']
+        if start_time > end_time:
+            self.add_error('start_time', 'Не верная дата')
+        if session is not None:
+            if start_time <= session.end_time:
+                self.add_error('hall', 'Зал уже занят')
+
+
+class QuantityTicketForm(forms.ModelForm):
+    quantity = forms.IntegerField(min_value=1)
+
+    class Meta:
+        model = Ticket
+        fields = ('quantity', )
+
 

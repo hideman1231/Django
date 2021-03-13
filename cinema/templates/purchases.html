@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block titles %}Профиль{% endblock %}
+
+{% block content %}
+    <h1>{{user}}<h1>
+    <h3>Всего потрачено: {{user.total_price}}<h3>
+    {% for ticket in object_list %}
+        <div>
+            Зал: {{ticket.session.hall.name}}
+            Сеанс: {{ticket.session}}
+            Цена: {{ticket.session.price}}
+            Дата показа: {{ticket.session.show_date}}
+        </div>
+    {% endfor %}
+    {% if page_obj %}
+        {% for num in page_obj.paginator.page_range %}
+            {% ifequal num page_obj.number %}
+            <span class="current"><b>{{ num }}</b></span>
+            {% else %}
+            <a href="?page={{ num }}"> {{ num }}</a>
+            {% endifequal %} 
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
