@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block titles %}{% endblock %}</title>
 </head>
 <body>
     {% block content %}
     {% endblock %}
+    <div>
+        <a href="{% url 'index' %}">Главная страница</a>
+    </div>
 </body>
 </html>

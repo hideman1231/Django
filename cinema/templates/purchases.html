@@ -13,7 +13,7 @@
             Дата показа: {{ticket.session.show_date}}
         </div>
     {% endfor %}
-    {% if page_obj %}
+    {% if page_obj > 1 %}
         {% for num in page_obj.paginator.page_range %}
             {% ifequal num page_obj.number %}
             <span class="current"><b>{{ num }}</b></span>
