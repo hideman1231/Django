@@ -1,5 +1,4 @@
 from django.shortcuts import render
-
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from mycinema.models import MyUser, CinemaHall, Session, Ticket
@@ -10,7 +9,7 @@ from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from datetime import timedelta
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin, PermissionRequiredMixin
 
 
 class UserLoginView(LoginView):
@@ -18,7 +17,7 @@ class UserLoginView(LoginView):
     template_name = 'login.html'
 
     def get_success_url(self):
-        return self.success_url 
+        return self.success_url
 
     def form_valid(self, form):
         self.request.session['time_action'] = str(timezone.now())
@@ -29,7 +28,7 @@ class UserRegisterView(CreateView):
     model = MyUser
     form_class = MyUserCreationForm
     success_url = reverse_lazy('index')
-    template_name = 'register.html'  
+    template_name = 'register.html'
 
 
 class UserLogoutView(LogoutView):
@@ -40,7 +39,7 @@ class SessionListView(ListView):
     model = Session
     template_name = 'index.html'
     context_object_name = 'sessions'
-    extra_context = {'quantity':QuantityTicketForm}
+    extra_context = {'quantity': QuantityTicketForm}
     paginate_by = 3
 
     def get_context_data(self, **kwargs):
@@ -50,28 +49,32 @@ class SessionListView(ListView):
         return context
 
     def get_queryset(self):
-        if self.request.GET.get('filter_price'):
-            return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('price')
-        elif self.request.GET.get('filter_start_time'):
-            return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('start_time')
+        if self.request.user.is_authenticated:
+            if self.request.GET.get('filter_price'):
+                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('price')
+            elif self.request.GET.get('filter_start_time'):
+                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('start_time')
         return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date())
 
 
-class CreateCinemaHallView(CreateView):
+class CreateCinemaHallView(PermissionRequiredMixin, CreateView):
+    permission_required = 'is_superuser'
     model = CinemaHall
     form_class = CreateCinemaHallForm
     success_url = reverse_lazy('index')
     template_name = 'create_cinema_hall.html'
 
 
-class CreateSessionView(CreateView):
+class CreateSessionView(PermissionRequiredMixin, CreateView):
+    permission_required = 'is_superuser'
     model = Session
     form_class = CreateSessionForm
     success_url = reverse_lazy('index')
     template_name = 'create_session.html'
 
 
-class CreateTicketView(CreateView):
+class CreateTicketView(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('login')
     model = Ticket
     form_class = QuantityTicketForm
     success_url = reverse_lazy('index')
@@ -92,7 +95,9 @@ class CreateTicketView(CreateView):
         customer.save()
         return HttpResponseRedirect(self.success_url)
 
-class UserPurchaseListView(ListView):
+
+class UserPurchaseListView(LoginRequiredMixin, ListView):
+    login_url = reverse_lazy('login')
     template_name = 'purchases.html'
     model = Ticket
     paginate_by = 10
@@ -101,7 +106,9 @@ class UserPurchaseListView(ListView):
         return super().get_queryset().filter(customer=self.request.user)
 
 
-class UpdateCinemaHallView(UserPassesTestMixin, UpdateView):
+class UpdateCinemaHallView(PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
+    permission_required = 'is_superuser'
+    login_url = reverse_lazy('login')
     model = CinemaHall
     success_url = reverse_lazy('index')
     form_class = CreateCinemaHallForm
@@ -116,7 +123,9 @@ class UpdateCinemaHallView(UserPassesTestMixin, UpdateView):
         return True
 
 
-class UpdateSessionView(UserPassesTestMixin, UpdateView):
+class UpdateSessionView(PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
+    permission_required = 'is_superuser'
+    login_url = reverse_lazy('login')
     model = Session
     success_url = reverse_lazy('index')
     form_class = UpdateSessionForm

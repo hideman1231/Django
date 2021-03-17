@@ -1,9 +1,9 @@
 from django.urls import path
-
 from mycinema.views import (SessionListView, UserLoginView, UserRegisterView, 
                             UserLogoutView, CreateCinemaHallView, CreateSessionView,
                             CreateTicketView, UserPurchaseListView, UpdateCinemaHallView,
                             UpdateSessionView, SessionForTomorrowListView)
+
 
 urlpatterns = [
     path('', SessionListView.as_view(), name='index'),
