@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from datetime import timedelta
 from django.utils import timezone
 from mycinema.models import MyUser, CinemaHall, Session, Ticket
-from mycinema.forms import MyUserCreationForm, FilterForm
+from mycinema.forms import MyUserCreationForm, FilterForm, CreateCinemaHallForm, CreateSessionForm
 import math
 
 
@@ -156,3 +156,99 @@ class SessionListViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse('filter' in response.context)
         self.assertEqual(list(response.context['sessions']), list(sessions_filter))
+
+class CreateCinemaHallViewTest(TestCase):
+
+    def setUp(self):
+        self.user = MyUser.objects.create_superuser(username='admin', password='123')
+        self.client.force_login(self.user)
+        self.url = reverse('create_cinema_hall')
+
+    def test_create_cinema_hall_get_no_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_create_cinema_hall_get_no_login(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_create_cinema_hall_get_succes(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'create_cinema_hall.html')
+        self.failUnless(isinstance(response.context['form'], CreateCinemaHallForm))
+
+    def test_create_cinema_hall_post_succes(self):
+        data = {'name': 'aaa', 'size': 30}
+        response = self.client.post(self.url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CinemaHall.objects.count(), 1)
+
+    def test_create_cinema_hall_post_succes_redirect(self):
+        data = {'name': 'aaa', 'size': 30}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('index'))
+
+    def test_create_cinema_hall_post_failure(self):
+        data = {'name': 'aaa'}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertEqual(CinemaHall.objects.count(), 0)
+        self.assertEqual(response.context['form'].errors, {'size': ['This field is required.']})
+
+class CreateSessionViewTest(TestCase):
+
+    def setUp(self):
+        self.user = MyUser.objects.create_superuser(username='admin', password='123')
+        self.client.force_login(self.user)
+        self.url = reverse('create_session')
+
+    def test_create_session_get_no_superuser(self):
+        self.user.is_superuser = False
+        self.user.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_create_session_get_no_login(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_create_session_get_succes(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'create_session.html')
+        self.failUnless(isinstance(response.context['form'], CreateSessionForm))
+
+    # def test_create_session_post_succes(self):
+    #     hall = CinemaHall.objects.create('name': 'ff', 'size': 20)
+    #     data = {
+    #         'hall': hall
+    #         'start_time': timezone.now().time(),
+    #         'end_time': (timezone.now() + timedelta(hours=1)).time(),
+    #         'start_date': timezone.now().date(),
+    #         'end_date': (timezone.now() + timedelta(days=5)).date(),
+    #         'price': 100
+    #     }
+    #     response = self.client.post(self.url, data=data)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(Session.objects.count(), 1)
+
+    # def test_create_session_post_falure(self):
+    #     data = {
+    #         'hall': hall
+    #         'start_time': timezone.now().time(),
+    #         'start_date': timezone.now().date(),
+    #         'end_date': (timezone.now() + timedelta(days=5)).date(),
+    #         'price': 100
+    #     }
+    #     response = self.client.post(self.url, data=data)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertFalse(response.context['form'].is_valid())
+    #     self.assertEqual(Session.objects.count(), 0)
+    #     breakpoint()

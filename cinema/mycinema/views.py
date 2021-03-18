@@ -59,6 +59,7 @@ class SessionListView(ListView):
 
 class CreateCinemaHallView(PermissionRequiredMixin, CreateView):
     permission_required = 'is_superuser'
+    login_url = reverse_lazy('login')
     model = CinemaHall
     form_class = CreateCinemaHallForm
     success_url = reverse_lazy('index')
@@ -67,6 +68,7 @@ class CreateCinemaHallView(PermissionRequiredMixin, CreateView):
 
 class CreateSessionView(PermissionRequiredMixin, CreateView):
     permission_required = 'is_superuser'
+    login_url = reverse_lazy('login')
     model = Session
     form_class = CreateSessionForm
     success_url = reverse_lazy('index')
