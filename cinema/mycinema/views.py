@@ -93,8 +93,8 @@ class CreateTicketView(LoginRequiredMixin, CreateView):
             return HttpResponseRedirect(self.success_url)
         for i in range(quantity):
             Ticket.objects.create(customer=customer, session=session)
-        customer.total_price += session.price 
-        customer.save()
+            customer.total_price += session.price
+            customer.save()
         return HttpResponseRedirect(self.success_url)
 
 
@@ -102,7 +102,7 @@ class UserPurchaseListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('login')
     template_name = 'purchases.html'
     model = Ticket
-    paginate_by = 10
+    paginate_by = 2
 
     def get_queryset(self):
         return super().get_queryset().filter(customer=self.request.user)
@@ -153,8 +153,9 @@ class SessionForTomorrowListView(ListView):
         return context
 
     def get_queryset(self):
-        if self.request.GET.get('filter_price'):
-            return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price')
-        elif self.request.GET.get('filter_start_time'):
-            return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time')
+        if self.request.user.is_authenticated:
+            if self.request.GET.get('filter_price'):
+                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price')
+            elif self.request.GET.get('filter_start_time'):
+                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time')
         return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1))

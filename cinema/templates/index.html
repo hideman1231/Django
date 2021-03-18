@@ -31,15 +31,22 @@
         <div>
             <form method="post" action="{% url 'create_ticket' %}">
                 {% csrf_token %}
-                <p>Зал: {{session.hall.name}} <a href="{% url 'update_cinema_hall' session.hall.pk %}">Изменить зал</a><p><br>
+                <p>Зал: {{session.hall.name}} 
+                {% if user.is_superuser %}
+                    <a href="{% url 'update_cinema_hall' session.hall.pk %}">Изменить зал</a><p><br>
+                {% endif %}
                 Свободных мест: {{ session.hall.size|sub:session.session_tickets.all.count }}<br>
                 Время: {{session.start_time.hour}}:{{session.start_time.minute}} - {{session.end_time.hour}}:{{session.end_time.minute}}<br>
                 Дата показа: {{session.show_date}}<br>
                 Цена билета: {{session.price}}<br>
-                {{quantity.quantity}}
-                <input type="hidden" name="session" value='{{session.pk}}'>
-                <input type="submit" value="Купить">
-                <a href="{% url 'update_session' session.pk %}">Изменить сеанс</a>
+                {% if user.is_authenticated %}
+                    {{quantity.quantity}}
+                    <input type="hidden" name="session" value='{{session.pk}}'>
+                    <input type="submit" value="Купить">
+                {% endif %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'update_session' session.pk %}">Изменить сеанс</a>
+                {% endif %}
             </form>
         </div>
     {% endfor %}

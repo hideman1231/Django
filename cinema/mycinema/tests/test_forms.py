@@ -36,7 +36,7 @@ class CreateSessionFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
 
-class UpdateSessionForm(TestCase):
+class UpdateSessionFormTest(TestCase):
 
     def setUp(self):
         self.cinema_hall = CinemaHall.objects.create(name='One', size=25)
@@ -60,9 +60,8 @@ class UpdateSessionForm(TestCase):
                     'start_date': (timezone.now() - timedelta(days=2)).date(),
                     'end_date': (timezone.now() + timedelta(days=8)).date(),
                     'price': 50}
-        # breakpoint()
-        # form = UpdateSessionForm(instance=self.session1, data=form_data)
-        # self.assertFalse(form.is_valid())
+        form = UpdateSessionForm(instance=self.session1, data=form_data)
+        self.assertFalse(form.is_valid())
 
     def test_update_succes(self):
         form_data = {'hall': self.cinema_hall,
@@ -71,5 +70,5 @@ class UpdateSessionForm(TestCase):
                     'start_date': (timezone.now() - timedelta(days=2)).date(),
                     'end_date': (timezone.now() + timedelta(days=8)).date(),
                     'price': 50}
-        # form = UpdateSessionForm(instance=self.session1, data=form_data)
-        # self.assertTrue(form.is_valid())
+        form = UpdateSessionForm(instance=self.session1, data=form_data)
+        self.assertTrue(form.is_valid())
