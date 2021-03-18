@@ -225,30 +225,31 @@ class CreateSessionViewTest(TestCase):
         self.assertTemplateUsed(response, 'create_session.html')
         self.failUnless(isinstance(response.context['form'], CreateSessionForm))
 
-    # def test_create_session_post_succes(self):
-    #     hall = CinemaHall.objects.create('name': 'ff', 'size': 20)
-    #     data = {
-    #         'hall': hall
-    #         'start_time': timezone.now().time(),
-    #         'end_time': (timezone.now() + timedelta(hours=1)).time(),
-    #         'start_date': timezone.now().date(),
-    #         'end_date': (timezone.now() + timedelta(days=5)).date(),
-    #         'price': 100
-    #     }
-    #     response = self.client.post(self.url, data=data)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(Session.objects.count(), 1)
+    def test_create_session_post_succes(self):
+        hall = CinemaHall.objects.create(name='ff', size=20)
+        data = {
+            'hall': hall.pk,
+            'start_time': timezone.now().time(),
+            'end_time': (timezone.now() + timedelta(hours=1)).time(),
+            'start_date': timezone.now().date(),
+            'end_date': (timezone.now() + timedelta(days=5)).date(),
+            'price': 100
+        }
+        response = self.client.post(self.url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Session.objects.count(), 1)
 
-    # def test_create_session_post_falure(self):
-    #     data = {
-    #         'hall': hall
-    #         'start_time': timezone.now().time(),
-    #         'start_date': timezone.now().date(),
-    #         'end_date': (timezone.now() + timedelta(days=5)).date(),
-    #         'price': 100
-    #     }
-    #     response = self.client.post(self.url, data=data)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertFalse(response.context['form'].is_valid())
-    #     self.assertEqual(Session.objects.count(), 0)
-    #     breakpoint()
+    def test_create_session_post_falure(self):
+        hall = CinemaHall.objects.create(name='ff', size=20)
+        data = {
+            'hall': hall.pk,
+            'start_time': timezone.now().time(),
+            'end_time': (timezone.now() + timedelta(hours=1)).time(),
+            'start_date': timezone.now().date(),
+            'end_date': (timezone.now() + timedelta(days=5)).date(),
+            'price': 'gf'
+        }
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertEqual(Session.objects.count(), 0)
