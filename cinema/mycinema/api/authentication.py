@@ -14,7 +14,6 @@ class CustomTokenAuthentication(TokenAuthentication):
             raise exceptions.AuthenticationFailed("Invalid Token")
         if not token.user.is_superuser:
             if token.time_to_die + timedelta(minutes=5) < timezone.now():
-                user = token.user
                 token.delete()
                 raise exceptions.AuthenticationFailed("Invalid Token")
             else:

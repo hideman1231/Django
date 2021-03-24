@@ -4,7 +4,7 @@ from django.db.models import Sum
 from django.contrib.auth.password_validation import validate_password
 
 
-class MyUserSerializer(serializers.ModelSerializer):
+class MyUserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
 
@@ -34,14 +34,20 @@ class CinemaHallSerializer(serializers.ModelSerializer):
 
 
 class SessionCreateSerializer(serializers.ModelSerializer):
+    free_places = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Session
         fields = (
-            'id', 'hall', 'start_time', 'end_time', 'start_date',
-            'end_date', 'show_date', 'price', 'status'
+            'id', 'hall', 'start_time', 'end_time', 'start_date', 'end_date',
+            'show_date', 'price', 'status', 'free_places'
         )
         read_only = ('id', 'show_date', 'status')
+
+    def get_free_places(self, obj):
+        if not obj.total:
+            obj.total = 0
+        return obj.hall.size - obj.total
 
     def validate(self, data):
         hall = data['hall']
@@ -59,14 +65,20 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
 
 class SessionUpdateSerializer(serializers.ModelSerializer):
+    free_places = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Session
         fields = (
             'id', 'hall', 'start_time', 'end_time', 'start_date',
-            'end_date', 'show_date', 'price', 'status'
+            'end_date', 'show_date', 'price', 'status', 'free_places'
         )
         read_only = ('id', 'show_date', 'status')
+
+    def get_free_places(self, obj):
+        if not obj.total:
+            obj.total = 0
+        return obj.hall.size - obj.total
 
     def validate(self, data):
         session = self.instance
