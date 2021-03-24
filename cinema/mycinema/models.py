@@ -2,12 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import datetime
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
+
 
 months = ['Января', 'Февраля', 'Марта', 'Апреля', 'Майа', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря']
 
 
 class MyUser(AbstractUser):
-    total_price = models.PositiveIntegerField(verbose_name='Сумма', default=0)
+    total_price = models.PositiveIntegerField(verbose_name='Сумма', default=0, blank=True)
 
 
 class CinemaHall(models.Model):
@@ -26,7 +28,7 @@ class Session(models.Model):
     end_date = models.DateField(verbose_name='Дата окончания')
     show_date = models.CharField(max_length=50, verbose_name='Дата показа', blank=True)
     price = models.PositiveSmallIntegerField(verbose_name='Цена билета')
-    status = models.BooleanField(default=True, verbose_name='Статус')
+    status = models.BooleanField(default=True, verbose_name='Статус', blank=True)
 
     def get_show_date(self):
         self.show_date = f'С {self.start_date.day} {months[self.start_date.month - 1]} {self.start_date.year} года по {self.end_date.day} {months[self.end_date.month - 1]} {self.end_date.year} года'
@@ -44,5 +46,10 @@ class Session(models.Model):
 
 
 class Ticket(models.Model):
-    customer = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='purchased_tickets', verbose_name='Покупатель')
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='session_tickets', verbose_name='Сеанс')
+    customer = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='purchased_tickets', verbose_name='Покупатель', blank=True)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='session_tickets', verbose_name='Сеанс', blank=True)
+    quantity = models.PositiveSmallIntegerField(verbose_name='Количество билетов')
+
+
+class MyToken(Token):
+    time_to_die = models.DateTimeField(default=timezone.now)

@@ -8,7 +8,7 @@ from mycinema.models import MyUser, CinemaHall, Session, Ticket
 from mycinema.forms import (MyUserCreationForm, FilterForm, CreateCinemaHallForm, 
                             CreateSessionForm, QuantityTicketForm, UpdateSessionForm)
 from datetime import timedelta, time
-
+from django.db.models import Sum
 
 
 class UserLoginViewTest(TestCase):
@@ -286,7 +286,7 @@ class CreateTicketViewTest(TestCase):
     def test_create_ticket_post_succes(self):
         data = {'quantity': 5, 'session':self.session1.pk}
         response = self.client.post(self.url, data=data, follow=True)
-        tickets = self.session1.session_tickets.count()
+        tickets = self.session1.session_tickets.aggregate(Sum('quantity'))['quantity__sum']
         total_price = response.context['user'].total_price
         self.assertEqual(tickets, data['quantity'])
         self.assertEqual(total_price, data['quantity'] * self.session1.price)
@@ -320,10 +320,10 @@ class UserPurchaseListViewTest(TestCase):
                                               start_date=timezone.now().date(),
                                               end_date=(timezone.now() + timedelta(days=5)).date(),
                                               price=500)
-        self.ticket1 = Ticket.objects.create(customer=self.user1, session=self.session1)
-        self.ticket2 = Ticket.objects.create(customer=self.user1, session=self.session1)
-        self.ticket3 = Ticket.objects.create(customer=self.user1, session=self.session1)
-        self.ticket4 = Ticket.objects.create(customer=self.user2, session=self.session1)
+        self.ticket1 = Ticket.objects.create(customer=self.user1, session=self.session1, quantity=1)
+        self.ticket2 = Ticket.objects.create(customer=self.user1, session=self.session1, quantity=1)
+        self.ticket3 = Ticket.objects.create(customer=self.user1, session=self.session1, quantity=1)
+        self.ticket4 = Ticket.objects.create(customer=self.user2, session=self.session1, quantity=2)
 
     def test_user_purchase_list_no_login(self):
         self.client.logout()
@@ -358,7 +358,7 @@ class UpdateCinemaHallViewTest(TestCase):
                                               start_date=timezone.now().date(),
                                               end_date=(timezone.now() + timedelta(days=5)).date(),
                                               price=500)
-        self.ticket = Ticket.objects.create(customer=self.user, session=self.session1)
+        self.ticket = Ticket.objects.create(customer=self.user, session=self.session1, quantity=1)
 
     def test_update_cinema_hall_get_no_superuser(self):
         self.user.is_superuser = False
@@ -411,7 +411,7 @@ class UpdateSessionViewTest(TestCase):
                                               start_date=timezone.now().date(),
                                               end_date=(timezone.now() + timedelta(days=5)).date(),
                                               price=500)
-        self.ticket = Ticket.objects.create(customer=self.user, session=self.session2)
+        self.ticket = Ticket.objects.create(customer=self.user, session=self.session2, quantity=1)
         self.url = reverse('update_session', args=[self.session2.pk])
 
     def test_update_session_get_no_superuser(self):

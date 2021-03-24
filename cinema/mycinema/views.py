@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from datetime import timedelta
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import Sum
 
 
 class UserLoginView(LoginView):
@@ -50,11 +51,27 @@ class SessionListView(ListView):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            if self.request.GET.get('filter_price'):
-                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('price')
-            elif self.request.GET.get('filter_start_time'):
-                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('start_time')
-        return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date())
+            price = self.request.GET.get('filter_price')
+            start_time = self.request.GET.get('filter_start_time')
+            if price and start_time:
+                return Session.objects.filter(
+                    status=True,
+                    end_date__gte=timezone.now().date(),
+                    start_date__lte=timezone.now().date()).order_by('price', 'start_time').annotate(total=Sum('session_tickets__quantity'))
+            elif price:
+                return Session.objects.filter(
+                    status=True,
+                    end_date__gte=timezone.now().date(),
+                    start_date__lte=timezone.now().date()).order_by('price').annotate(total=Sum('session_tickets__quantity'))
+            elif start_time:
+                return Session.objects.filter(
+                    status=True,
+                    end_date__gte=timezone.now().date(),
+                    start_date__lte=timezone.now().date()).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
+        return Session.objects.filter(
+            status=True,
+            end_date__gte=timezone.now().date(),
+            start_date__lte=timezone.now().date()).annotate(total=Sum('session_tickets__quantity'))
 
 
 class CreateCinemaHallView(PermissionRequiredMixin, CreateView):
@@ -83,19 +100,23 @@ class CreateTicketView(LoginRequiredMixin, CreateView):
     template_name = 'index.html'
 
     def form_valid(self, form):
-        quantity = int(self.request.POST['quantity'])
+        object = form.save(commit=False)
+        quantity = int(form.data['quantity'])
+        user = self.request.user
+        object.customer = user
         session = Session.objects.get(id=self.request.POST['session'])
+        object.session = session
         hall = session.hall
-        customer = self.request.user
-        free_places = hall.size - session.session_tickets.count()
-        if free_places - quantity < 0:
+        total_quantity = session.session_tickets.aggregate(Sum('quantity'))['quantity__sum']
+        if not total_quantity:
+            total_quantity = 0
+        free_places = hall.size - total_quantity
+        if free_places < quantity:
             messages.error(self.request, f'Мест не хватает! Свободных мест: {free_places}')
             return HttpResponseRedirect(self.success_url)
-        for i in range(quantity):
-            Ticket.objects.create(customer=customer, session=session)
-            customer.total_price += session.price
-            customer.save()
-        return HttpResponseRedirect(self.success_url)
+        user.total_price += quantity * session.price
+        user.save()
+        return super().form_valid(form=form)
 
 
 class UserPurchaseListView(LoginRequiredMixin, ListView):
@@ -154,8 +175,23 @@ class SessionForTomorrowListView(ListView):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            if self.request.GET.get('filter_price'):
-                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price')
-            elif self.request.GET.get('filter_start_time'):
-                return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time')
-        return super().get_queryset().filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1))
+            price = self.request.GET.get('filter_price')
+            start_time = self.request.GET.get('filter_start_time')
+            if price and start_time:
+                return Session.objects.filter(
+                    status=True,
+                    end_date__gte=timezone.now().date() + timedelta(days=1),
+                    start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price', 'start_time').annotate(total=Sum('session_tickets__quantity'))
+            elif price:
+                return Session.objects.filter(status=True,
+                end_date__gte=timezone.now().date() + timedelta(days=1),
+                start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price').annotate(total=Sum('session_tickets__quantity'))
+            elif start_time:
+                return Session.objects.filter(
+                    status=True,
+                    end_date__gte=timezone.now().date() + timedelta(days=1),
+                    start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
+        return Session.objects.filter(
+            status=True,
+            end_date__gte=timezone.now().date() + timedelta(days=1),
+            start_date__lte=timezone.now().date() + timedelta(days=1)).annotate(total=Sum('session_tickets__quantity'))

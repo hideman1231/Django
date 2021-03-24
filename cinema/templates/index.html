@@ -24,7 +24,7 @@
     {% endif %}
     {% if messages %}
         {% for message in messages %}
-            <p>{{message|safe}}</p>
+            <p style="color: red;">{{message|safe}}</p>
         {% endfor %}
     {% endif %}
     {% for session in sessions %}
@@ -35,7 +35,7 @@
                 {% if user.is_superuser %}
                     <a href="{% url 'update_cinema_hall' session.hall.pk %}">Изменить зал</a><p><br>
                 {% endif %}
-                Свободных мест: {{ session.hall.size|sub:session.session_tickets.all.count }}<br>
+                Свободных мест: {{ session.hall.size|sub:session.total }}<br>
                 Время: {{session.start_time.hour}}:{{session.start_time.minute}} - {{session.end_time.hour}}:{{session.end_time.minute}}<br>
                 Дата показа: {{session.show_date}}<br>
                 Цена билета: {{session.price}}<br>

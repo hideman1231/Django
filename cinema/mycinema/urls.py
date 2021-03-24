@@ -1,12 +1,24 @@
-from django.urls import path
+from django.urls import path, include
 from mycinema.views import (SessionListView, UserLoginView, UserRegisterView, 
                             UserLogoutView, CreateCinemaHallView, CreateSessionView,
                             CreateTicketView, UserPurchaseListView, UpdateCinemaHallView,
                             UpdateSessionView, SessionForTomorrowListView)
+from mycinema.api.resources import (MyUserViewSet, CinemaHallViewSet, SessionViewSet,
+                                    TicketViewSet, CustomAuthToken)
+from rest_framework import routers
+from rest_framework.authtoken.views import obtain_auth_token
 
+
+router = routers.SimpleRouter()
+router.register(r'users', MyUserViewSet)
+router.register(r'cinema-halls', CinemaHallViewSet)
+router.register(r'sessions', SessionViewSet)
+router.register(r'tickets', TicketViewSet)
 
 urlpatterns = [
     path('', SessionListView.as_view(), name='index'),
+    path('api/', include(router.urls)),
+    path('api-token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),
     path('login/', UserLoginView.as_view(), name='login'),
     path('register/', UserRegisterView.as_view(), name='register'),
     path('logout/', UserLogoutView.as_view(), name='logout'),
