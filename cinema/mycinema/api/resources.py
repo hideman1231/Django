@@ -2,13 +2,16 @@ from mycinema.models import MyUser, CinemaHall, Session, Ticket, MyToken
 from mycinema.api.serializers import (MyUserRegisterSerializer, CinemaHallSerializer, SessionCreateSerializer,
                                     SessionUpdateSerializer, TicketSerializer)
 from rest_framework.response import Response
-from rest_framework import viewsets, status, permissions, generics
+from rest_framework import viewsets, status, permissions, generics, pagination
 from rest_framework.authtoken.views import ObtainAuthToken
 from datetime import timedelta
 from django.utils import timezone
 from .permissions import CustomSessionUpdatePermisson, CustomCinemaHallUpdatePermisson
 from django.db.models import Sum
 
+
+class MyPageNumberPagination(pagination.PageNumberPagination):
+    page_size = 3
 
 # class CinemaHallViewSet(viewsets.ModelViewSet):
 #     queryset = CinemaHall.objects.all()
@@ -74,6 +77,7 @@ class UserRegisterAPIView(generics.CreateAPIView):
 
 class SessionListAPIView(generics.ListAPIView):
     serializer_class = SessionCreateSerializer
+    pagination_class = MyPageNumberPagination
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -129,6 +133,7 @@ class CreateTicketAPIView(generics.CreateAPIView):
 class UserPurchaseListAPIView(generics.ListAPIView):
     serializer_class = TicketSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = MyPageNumberPagination
 
     def get_queryset(self):
         return Ticket.objects.filter(customer=self.request.user)
@@ -148,12 +153,13 @@ class UpdateSessionAPIView(generics.UpdateAPIView):
 
 class SessionForTomorrowListAPIView(generics.ListAPIView):
     serializer_class = SessionCreateSerializer
-
+    pagination_class = MyPageNumberPagination
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
             price = self.request.query_params.get('price')
             start_time = self.request.query_params.get('start_time')
+            hall = self.request.query_params.get('hall')
             if price and start_time:
                 return Session.objects.filter(
                     status=True,
@@ -170,6 +176,7 @@ class SessionForTomorrowListAPIView(generics.ListAPIView):
                     start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
         return Session.objects.filter(
             status=True,
+            hall=hall,
             end_date__gte=timezone.now().date() + timedelta(days=1),
             start_date__lte=timezone.now().date() + timedelta(days=1)).annotate(total=Sum('session_tickets__quantity'))
-        
+

@@ -31,9 +31,9 @@ urlpatterns = [
 
     # Django rest_framework
     # path('api/', include(router.urls)),
+    path('api/token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),
     path('api/register/', UserRegisterAPIView.as_view(), name='api_register'),
     path('api/sessions/', SessionListAPIView.as_view(), name='api_sessions'),
-    path('api/token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),
     path('api/create/cinema-hall/', CreateCinemaHallAPIView.as_view(), name='api_create_cinema_hall'),
     path('api/create/session/', CreateSessionAPIView.as_view(), name='api_create_session'),
     path('api/create/ticket/', CreateTicketAPIView.as_view(), name='api_create_ticket'),

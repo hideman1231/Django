@@ -123,7 +123,7 @@ class UserPurchaseListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('login')
     template_name = 'purchases.html'
     model = Ticket
-    paginate_by = 2
+    paginate_by = 3
 
     def get_queryset(self):
         return super().get_queryset().filter(customer=self.request.user)
