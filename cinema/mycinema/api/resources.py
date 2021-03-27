@@ -4,10 +4,10 @@ from mycinema.api.serializers import (MyUserRegisterSerializer, CinemaHallSerial
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions, generics, pagination
 from rest_framework.authtoken.views import ObtainAuthToken
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from .permissions import CustomSessionUpdatePermisson, CustomCinemaHallUpdatePermisson
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 
 class MyPageNumberPagination(pagination.PageNumberPagination):
@@ -80,28 +80,38 @@ class SessionListAPIView(generics.ListAPIView):
     pagination_class = MyPageNumberPagination
 
     def get_queryset(self):
+        q1 = Q(status=True,
+               end_date__gte=timezone.now().date(),
+               start_date__lte=timezone.now().date())
+        q2 = Q()
+        q3 = Q()
         if self.request.user.is_authenticated:
             price = self.request.query_params.get('price')
             start_time = self.request.query_params.get('start_time')
+            hall = self.request.query_params.get('hall')
+            time = self.request.query_params.get('time')
+            if hall:
+                q2 = Q(hall=hall)
+            if time:
+                time_list = time.split('-')
+                start = datetime.strptime(time_list[0], '%H:%M').time()
+                end = datetime.strptime(time_list[1], '%H:%M').time()
+                q3 = Q(start_time__gte=start, end_time__lte=end)
             if price and start_time:
                 return Session.objects.filter(
-                    status=True,
-                    end_date__gte=timezone.now().date(),
-                    start_date__lte=timezone.now().date()).order_by('price', 'start_time').annotate(total=Sum('session_tickets__quantity'))
+                    q1 & q2 & q3
+                    ).order_by('price', 'start_time').annotate(total=Sum('session_tickets__quantity'))
             elif price:
                 return Session.objects.filter(
-                    status=True,
-                    end_date__gte=timezone.now().date(),
-                    start_date__lte=timezone.now().date()).order_by('price').annotate(total=Sum('session_tickets__quantity'))
+                    q1 & q2 & q3
+                    ).order_by('price').annotate(total=Sum('session_tickets__quantity'))
             elif start_time:
                 return Session.objects.filter(
-                    status=True,
-                    end_date__gte=timezone.now().date(),
-                    start_date__lte=timezone.now().date()).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
+                    q1 & q2 & q3
+                    ).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
         return Session.objects.filter(
-            status=True,
-            end_date__gte=timezone.now().date(),
-            start_date__lte=timezone.now().date()).annotate(total=Sum('session_tickets__quantity'))
+                    q1 & q2 & q3
+                    ).annotate(total=Sum('session_tickets__quantity'))
 
 
 class CreateCinemaHallAPIView(generics.CreateAPIView):
@@ -156,27 +166,35 @@ class SessionForTomorrowListAPIView(generics.ListAPIView):
     pagination_class = MyPageNumberPagination
 
     def get_queryset(self):
+        q1 = Q(status=True,
+               end_date__gte=timezone.now().date() + timedelta(days=1),
+               start_date__lte=timezone.now().date() + timedelta(days=1))
+        q2 = Q()
+        q3 = Q()
         if self.request.user.is_authenticated:
             price = self.request.query_params.get('price')
             start_time = self.request.query_params.get('start_time')
             hall = self.request.query_params.get('hall')
+            time = self.request.query_params.get('time')
+            if hall:
+                q2 = Q(hall=hall)
+            if time:
+                time_list = time.split('-')
+                start = datetime.strptime(time_list[0], '%H:%M').time()
+                end = datetime.strptime(time_list[1], '%H:%M').time()
+                q3 = Q(start_time__gte=start, end_time__lte=end)
             if price and start_time:
                 return Session.objects.filter(
-                    status=True,
-                    end_date__gte=timezone.now().date() + timedelta(days=1),
-                    start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price', 'start_time').annotate(total=Sum('session_tickets__quantity'))
+                    q1 & q2 & q3
+                    ).order_by('price', 'start_time').annotate(total=Sum('session_tickets__quantity'))
             elif price:
-                return Session.objects.filter(status=True,
-                end_date__gte=timezone.now().date() + timedelta(days=1),
-                start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price').annotate(total=Sum('session_tickets__quantity'))
+                return Session.objects.filter(
+                    q1 & q2 & q3
+                    ).order_by('price').annotate(total=Sum('session_tickets__quantity'))
             elif start_time:
                 return Session.objects.filter(
-                    status=True,
-                    end_date__gte=timezone.now().date() + timedelta(days=1),
-                    start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
+                    q1 & q2 & q3
+                    ).order_by('start_time').annotate(total=Sum('session_tickets__quantity'))
         return Session.objects.filter(
-            status=True,
-            hall=hall,
-            end_date__gte=timezone.now().date() + timedelta(days=1),
-            start_date__lte=timezone.now().date() + timedelta(days=1)).annotate(total=Sum('session_tickets__quantity'))
-
+                    q1 & q2 & q3
+                    ).annotate(total=Sum('session_tickets__quantity'))

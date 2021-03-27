@@ -45,9 +45,11 @@ class SessionCreateSerializer(serializers.ModelSerializer):
         read_only = ('id', 'show_date', 'status')
 
     def get_free_places(self, obj):
-        if not obj.total:
-            obj.total = 0
-        return obj.hall.size - obj.total
+        try:
+            if obj.total:
+                return obj.hall.size - obj.total
+        except AttributeError:
+            return obj.hall.size
 
     def validate(self, data):
         hall = data['hall']
@@ -76,9 +78,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         read_only = ('id', 'show_date', 'status')
 
     def get_free_places(self, obj):
-        if not obj.total:
-            obj.total = 0
-        return obj.hall.size - obj.total
+        try:
+            if obj.total:
+                return obj.hall.size - obj.total
+        except AttributeError:
+            return obj.hall.size
 
     def validate(self, data):
         session = self.instance
