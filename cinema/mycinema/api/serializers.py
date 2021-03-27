@@ -45,11 +45,9 @@ class SessionCreateSerializer(serializers.ModelSerializer):
         read_only = ('id', 'show_date', 'status')
 
     def get_free_places(self, obj):
-        try:
-            if obj.total:
-                return obj.hall.size - obj.total
-        except AttributeError:
-            return obj.hall.size
+        if obj.total:
+            return obj.hall.size - obj.total
+        return obj.hall.size
 
     def validate(self, data):
         hall = data['hall']
@@ -78,11 +76,9 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         read_only = ('id', 'show_date', 'status')
 
     def get_free_places(self, obj):
-        try:
-            if obj.total:
-                return obj.hall.size - obj.total
-        except AttributeError:
-            return obj.hall.size
+        if obj.total:
+            return obj.hall.size - obj.total
+        return obj.hall.size
 
     def validate(self, data):
         session = self.instance
@@ -111,11 +107,15 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    total_price = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Ticket
-        fields = ('id', 'customer', 'session', 'quantity')
+        fields = ('id', 'customer', 'session', 'quantity', 'total_price')
         read_only = ('id', 'customer')
+
+    def get_total_price(self, obj):
+        return obj.customer.total_price
 
     def validate(self, data):
         quantity = data['quantity']
