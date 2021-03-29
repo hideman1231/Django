@@ -14,7 +14,7 @@ from mycinema.api.resources import (UserRegisterAPIView, CinemaHallViewSet, Sess
 
 
 router = routers.SimpleRouter()
-router.register(r'cinema-halls', CinemaHallViewSet)
+router.register(r'cinema-halls', CinemaHallViewSet, basename='cinema-halls')
 router.register(r'sessions', SessionViewSet)
 router.register(r'tickets', TicketViewSet)
 

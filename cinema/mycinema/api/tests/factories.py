@@ -12,7 +12,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = MyUser
 
-    username = fake.user_name()
+    username = factory.Faker('user_name')
     password = factory.PostGenerationMethodCall('set_password', '1')
 
 
@@ -39,3 +39,13 @@ class SessionFactory(factory.django.DjangoModelFactory):
 
     if start_time > end_time:
         start_time, end_time = end_time, start_time
+
+
+class TicketFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+       model = Ticket
+       
+    customer =  factory.SubFactory(UserFactory)
+    session = factory.SubFactory(SessionFactory)
+    quantity = 1
