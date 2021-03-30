@@ -52,7 +52,6 @@ class UserRegisterAPIViewTest(APITestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(MyUser.objects.count(), 0)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # self.assertEqual(response.data['non_field_errors'], ['Пароли не совпадают'])
 
 
 class CinemaHallViewSetTest(APITestCase):
@@ -102,7 +101,6 @@ class CinemaHallViewSetTest(APITestCase):
         url = reverse('cinema-halls-detail', args=[self.hall.pk])
         response = self.client.put(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        # self.assertIn('You cannot change which hall is occupied', response.data['detail'])
 
     def test_cinema_hall_patch_succes(self):
         data = {'name': 'one'}
@@ -119,7 +117,6 @@ class CinemaHallViewSetTest(APITestCase):
         url = reverse('cinema-halls-detail', args=[self.hall.pk])
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        # self.assertEqual(response.data['detail'], ['You cannot change which hall is occupied'])
 
 
 class SessionViewSetTest(APITestCase):
@@ -362,7 +359,6 @@ class SessionViewSetTest(APITestCase):
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # self.assertEqual(response.data['non_field_errors'], ['Зал в это время занят'])
 
     def test_session_put_no_login(self):
         self.client.logout()
@@ -404,7 +400,6 @@ class SessionViewSetTest(APITestCase):
         }
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # self.assertEqual(response.data['non_field_errors'], ['Зал в это время занят'])
 
     def test_session_put_failure_busy(self):
         self.user.is_staff = True
@@ -421,7 +416,6 @@ class SessionViewSetTest(APITestCase):
         }
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        # self.assertEqual(response.data['detail'], ['You cannot change the session for which the ticket was purchased'])
 
     def test_session_patch_succes(self):
         self.user.is_staff = True
@@ -446,7 +440,6 @@ class SessionViewSetTest(APITestCase):
         }
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # self.assertEqual(response.data['non_field_errors'], ['Зал в это время занят'])
 
     def test_session_patch_failure_busy(self):
         self.user.is_staff = True
@@ -460,7 +453,6 @@ class SessionViewSetTest(APITestCase):
         }
         response = self.client.patch(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        # self.assertEqual(response.data['detail'], ['You cannot change the session for which the ticket was purchased'])
 
 class TicketViewSetTest(APITestCase):
 

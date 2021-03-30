@@ -44,8 +44,8 @@ class SessionFactory(factory.django.DjangoModelFactory):
 class TicketFactory(factory.django.DjangoModelFactory):
 
     class Meta:
-       model = Ticket
-       
-    customer =  factory.SubFactory(UserFactory)
+        model = Ticket
+
+    customer = factory.SubFactory(UserFactory)
     session = factory.SubFactory(SessionFactory)
     quantity = 1

@@ -9,6 +9,8 @@ from mycinema.forms import (MyUserCreationForm, FilterForm, CreateCinemaHallForm
                             CreateSessionForm, QuantityTicketForm, UpdateSessionForm)
 from datetime import timedelta, time
 from django.db.models import Sum
+from datetime import timedelta, datetime
+from django.utils import timezone
 
 
 class UserLoginViewTest(TestCase):
@@ -137,24 +139,40 @@ class SessionListViewTest(TestCase):
 
     def test_session_list_get_paginate_queryset(self):
         response = self.client.get(self.url)
-        sessions = Session.objects.filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).count()
+        sessions = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date(), 
+            start_date__lte=timezone.now().date()).count()
         pages = math.ceil(sessions / response.context['paginator'].per_page)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['paginator'].num_pages, pages)
         self.assertEqual(response.context['paginator'].count, sessions)
 
-    def test_session_list_get_filter(self):
+    def test_session_list_get_filter_price(self):
         data = {'filter_price': True}
         response = self.client.get(self.url, data=data) 
-        sessions_filter = Session.objects.filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date()).order_by('price')[:3]
+        sessions_filter = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date(), 
+            start_date__lte=timezone.now().date()).order_by('price')[:3]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['filter'], FilterForm)
-        self.assertQuerysetEqual(response.context['sessions'], [repr(i) for i in sessions_filter])
+        self.assertQuerysetEqual(response.context['session'], [repr(i) for i in sessions_filter])
+
+    def test_session_list_get_filter_start_time(self):
+        data = {'filter_start_time': True}
+        response = self.client.get(self.url, data=data)
+        sessions_filter = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date(), 
+            start_date__lte=timezone.now().date()).order_by('start_time')[:3]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['filter'], FilterForm)
+        self.assertQuerysetEqual(response.context['session'], [repr(i) for i in sessions_filter])
 
     def test_session_list_get_no_login(self):
         data = {'filter_price': True}
         self.client.logout()
-        sessions_filter = Session.objects.filter(status=True, end_date__gte=timezone.now().date(), start_date__lte=timezone.now().date())[:3]
+        sessions_filter = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date(), 
+            start_date__lte=timezone.now().date())[:3]
         response = self.client.get(self.url, data=data)
         self.assertEqual(response.status_code, 200)
         self.assertFalse('filter' in response.context)
@@ -513,10 +531,22 @@ class SessionForTomorrowListViewTest(TestCase):
         self.assertEqual(response.context['paginator'].num_pages, pages)
         self.assertEqual(response.context['paginator'].count, sessions)
 
-    def test_session_for_tomorrow_list_get_filter(self):
+    def test_session_for_tomorrow_list_get_filter_price(self):
         data = {'filter_price': True}
         response = self.client.get(self.url, data=data) 
-        sessions_filter = Session.objects.filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price')[:3]
+        sessions_filter = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date() + timedelta(days=1), 
+            start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('price')[:3]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['filter'], FilterForm)
+        self.assertQuerysetEqual(response.context['session_list'], [repr(i) for i in sessions_filter])
+
+    def test_session_for_tomorrow_list_get_filter_start_time(self):
+        data = {'filter_start_time': True}
+        response = self.client.get(self.url, data=data)
+        sessions_filter = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date() + timedelta(days=1), 
+            start_date__lte=timezone.now().date() + timedelta(days=1)).order_by('start_time')[:3]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['filter'], FilterForm)
         self.assertQuerysetEqual(response.context['session_list'], [repr(i) for i in sessions_filter])
@@ -524,7 +554,9 @@ class SessionForTomorrowListViewTest(TestCase):
     def test_session_for_tomorrow_list_get_no_login(self):
         data = {'filter_price': True}
         self.client.logout()
-        sessions_filter = Session.objects.filter(status=True, end_date__gte=timezone.now().date() + timedelta(days=1), start_date__lte=timezone.now().date() + timedelta(days=1))[:3]
+        sessions_filter = Session.objects.filter(status=True, 
+            end_date__gte=timezone.now().date() + timedelta(days=1), 
+            start_date__lte=timezone.now().date() + timedelta(days=1))[:3]
         response = self.client.get(self.url, data=data)
         self.assertEqual(response.status_code, 200)
         self.assertFalse('filter' in response.context)

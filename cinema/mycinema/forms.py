@@ -33,7 +33,7 @@ class CreateSessionForm(forms.ModelForm):
         end_time = cleaned_data['end_time']
         start_date = cleaned_data['start_date']
         end_date = cleaned_data['end_date']
-        if start_time >= end_time:
+        if start_time >= end_time or start_date >= end_date:
             self.add_error('start_time', 'Начало не может быть больше конца')
         sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date, start_date__lte=end_date)
         if sessions_that_overlap:
@@ -68,7 +68,7 @@ class UpdateSessionForm(forms.ModelForm):
         end_time = cleaned_data['end_time']
         start_date = cleaned_data['start_date']
         end_date = cleaned_data['end_date']
-        if start_time >= end_time:
+        if start_time >= end_time or start_date >= end_date:
             self.add_error('start_time', 'Начало не может быть больше конца')
         sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date, start_date__lte=end_date).exclude(id=curent_session.pk)
         if sessions_that_overlap:

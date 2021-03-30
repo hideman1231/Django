@@ -1,12 +1,12 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from mycinema.models import MyUser, CinemaHall, Session, Ticket, MyToken
+from rest_framework.test import APITestCase
+from mycinema.models import MyUser, CinemaHall, Session, Ticket
 from datetime import timedelta
 from django.utils import timezone
 from datetime import timedelta, time, datetime
 from mycinema.api.serializers import (MyUserRegisterSerializer, CinemaHallSerializer, SessionCreateSerializer,
                                     SessionUpdateSerializer, TicketSerializer)
 from .factories import UserFactory, CinemaHallFactory, SessionFactory, TicketFactory
+
 
 class MyUserRegisterSerializerTest(APITestCase):
 
@@ -120,9 +120,9 @@ class TicketSerializerTest(APITestCase):
         self.user = UserFactory()
         self.cinema_hall = CinemaHallFactory()
         self.session = SessionFactory(hall=self.cinema_hall,
-                       start_time=time(8, 40, 41),
-                       end_time=time(10, 40, 41),
-                       price=20)
+                                      start_time=time(8, 40, 41),
+                                      end_time=time(10, 40, 41),
+                                      price=20)
 
     def test_create_ticket_succes(self):
         data = {

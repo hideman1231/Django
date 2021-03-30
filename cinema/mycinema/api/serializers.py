@@ -19,7 +19,7 @@ class MyUserRegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        user = MyUser.objects.create_user(username=validated_data['username'])
+        user = MyUser.objects.create(username=validated_data['username'])
         user.set_password(validated_data['password'])
         user.save()
         return user
@@ -46,9 +46,8 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
     def get_free_places(self, obj):
         try:
-            if obj.total:
-                return obj.hall.size - obj.total
-        except AttributeError:
+            return obj.hall.size - obj.total
+        except (AttributeError, TypeError):
             return obj.hall.size
 
     def validate(self, data):
@@ -57,7 +56,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
         end_date = data['end_date']
         start_time = data['start_time']
         end_time = data['end_time']
-        if start_time >= end_time:
+        if start_time >= end_time or start_date >= end_date:
             raise serializers.ValidationError('Начало не может быть больше конца')
         sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date, start_date__lte=end_date)
         if sessions_that_overlap:
@@ -79,9 +78,8 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
 
     def get_free_places(self, obj):
         try:
-            if obj.total:
-                return obj.hall.size - obj.total
-        except AttributeError:
+            return obj.hall.size - obj.total
+        except (AttributeError, TypeError):
             return obj.hall.size
 
     def validate(self, data):
@@ -101,7 +99,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         end_time = data.get('end_time')
         if not end_time:
             end_time = session.end_time
-        if start_time >= end_time:
+        if start_time >= end_time or start_date >= end_date:
             raise serializers.ValidationError('Начало не может быть больше конца')
         sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date, start_date__lte=end_date).exclude(id=session.pk)
         if sessions_that_overlap:

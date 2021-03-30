@@ -4,21 +4,27 @@ from rest_framework import permissions
 class CustomCinemaHallUpdatePermisson(permissions.BasePermission):
     message = 'You cannot change which hall is occupied'
 
-    def has_permission(self, request, view):
+    def has_object_permission(self, request, view, obj):
         if request.method in ['PATCH', 'PUT']:
-            sessions = view.get_object().sessions.filter(status=True)
+            sessions = obj.sessions.filter(status=True)
             if sessions:
                 for session in sessions:
                     if session.session_tickets.first():
                         return False
         return True
 
+    def has_permission(self, request, view):
+        return True
+
 
 class CustomSessionUpdatePermisson(permissions.BasePermission):
     message = 'You cannot change the session for which the ticket was purchased'
 
-    def has_permission(self, request, view):
+    def has_object_permission(self, request, view, obj):
         if request.method in ['PATCH', 'PUT']:
-            if view.get_object().session_tickets.first():
+            if obj.session_tickets.first():
                 return False
+        return True
+
+    def has_permission(self, request, view):
         return True
