@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 import requests
 from bs4 import BeautifulSoup
+import re
 
 
 def parser_weather():
@@ -29,7 +30,14 @@ class HomeView(TemplateView):
     def get(self, request, *args, **kwargs):
         today_weather = parser_weather()
         context = self.get_context_data(**kwargs)
-        context['weather'] = today_weather.text
+        degree = re.search(r'[-+]?\d+', today_weather.text)
+        if int(degree.group()) <= -10:
+            prompt = 'Dress warmly!!!'
+        elif -10 > int(degree.group()) > 10:
+            prompt = 'What a heat)'
+        else:
+            prompt = 'Nice weather)'
+        context['weather'] = f'{today_weather.text}. {prompt}'
         return self.render_to_response(context)
 
 
