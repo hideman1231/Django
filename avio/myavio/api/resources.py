@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from rest_framework import viewsets, status, permissions, generics, pagination
+from rest_framework import viewsets, status, permissions, generics, pagination, mixins
 from rest_framework.decorators import action
 from myavio.api.serializers import (MyUserRegisterSerializer, UserProfileSerializer,
                                     PostSerializer, CDLikePostSerializer, CUDCommentSerializer)
@@ -44,7 +44,9 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(user=user)
 
 
-class LikePostAPIView(generics.GenericAPIView):
+class LikePostAPIView(generics.GenericAPIView,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin):
     queryset = LikePost.objects.all()
     serializer_class = CDLikePostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -52,22 +54,6 @@ class LikePostAPIView(generics.GenericAPIView):
     def perform_create(self, serializer):
         user = self.request.user
         serializer.save(user=user)
-
-    def perform_destroy(self, instance):
-        instance.delete()
-
-    def get_success_headers(self, data):
-        try:
-            return {'Location': str(data[api_settings.URL_FIELD_NAME])}
-        except (TypeError, KeyError):
-            return {}
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def destroy(self, request, like_post, *args, **kwargs):
         instance = like_post
