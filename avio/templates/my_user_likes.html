@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}User likes{% endblock %}
+
+{% block content %}
+    {% for user in post.post_likes.all %}
+        <h3><a href="{% url 'profile' user %}">{{user}}</a></h3>
+    {% endfor %}
+{% endblock %}

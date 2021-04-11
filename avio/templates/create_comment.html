@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Comment{% endblock %}
+
+{% block content %}
+    {% for comment in post.comments.all %}
+        {% if not comment.parent %}
+            {{comment.user}}: {{comment.text}}<br>
+        {% else %}
+            {{comment.user}}: replied to {{comment.parent}}: {{comment.text}}
+        {% endif %}
+        <form method="post" action="{% url 'create_comment' post.pk %}">
+        {% csrf_token %}
+        {{comment_form}}
+        <input type="hidden" name="comment_pk" value="{{comment.pk}}">
+        <input type="submit" value="reply">
+        </form>
+    {% endfor %}
+    <form method="post" action="{% url 'create_comment' post.pk %}">
+    {% csrf_token %}
+    {{comment_form}}
+    <input type="submit" value="Create comment">
+    </form>
+{% endblock %}

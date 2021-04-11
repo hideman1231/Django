@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}My profile{% endblock %}
+
+{% block content %}
+    {% if object == user %}
+        <a href="{% url 'my_like_post' user.username %}">My liked</a>
+        <a href="{% url 'create_post' %}">Create Post</a>
+        <a href="{% url 'update_profile' user.username %}">Change profile</a>
+    {% endif %}
+    Nickname: {{object.username}}<br>
+    Avatar: <img src="{{object.profiles.photo.url}}" width="90px" height="90px"><br>
+    Bio: {{object.profiles.bio}}<br>
+    My posts: <br>
+    {% for post in object.posts.all %}
+        Photo: <img src="{{post.photo.url}}" width="90px" height="90px"><br>
+        Text: {{post.text}}<br>
+        Created: {{post.created_at}}<br>
+        <a href="{% url 'my_like_user' post.pk %}">Likes: {{post.post_likes.count}}</a>
+        <a href="{% url 'comments' post.pk %}">Comments: {{post.comments.count}}</a>
+        <form method="post" action="{% url 'like_dislike' post.pk %}">
+            {% csrf_token %}
+            <input type="submit" value="like">
+        </form>
+        {% if object == user %}
+        <a href="{% url 'update_post' post.pk %}"><button>change</button></a>
+        <form method="post" action="{% url 'delete_post' post.pk %}">
+            {% csrf_token %}
+            <input type="submit" value="delete">
+        </form>
+        {% endif %}
+    {% endfor %}
+    {% if page_obj.paginator.num_pages > 1 %}
+        {% for num in page_obj.paginator.page_range %}
+            {% ifequal num page_obj.number %}
+            <span class="current"><b>{{ num }}</b></span>
+            {% else %}
+            <a href="?page={{ num }}"> {{ num }}</a>
+            {% endifequal %} 
+        {% endfor %}
+    {% endif %}
+{% endblock %}
