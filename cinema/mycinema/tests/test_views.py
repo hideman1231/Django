@@ -155,7 +155,7 @@ class SessionListViewTest(TestCase):
             start_date__lte=timezone.now().date()).order_by('price')[:3]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['filter'], FilterForm)
-        self.assertQuerysetEqual(response.context['session'], [repr(i) for i in sessions_filter])
+        self.assertQuerysetEqual(response.context['sessions'], [repr(i) for i in sessions_filter])
 
     def test_session_list_get_filter_start_time(self):
         data = {'filter_start_time': True}
@@ -165,7 +165,7 @@ class SessionListViewTest(TestCase):
             start_date__lte=timezone.now().date()).order_by('start_time')[:3]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['filter'], FilterForm)
-        self.assertQuerysetEqual(response.context['session'], [repr(i) for i in sessions_filter])
+        self.assertQuerysetEqual(response.context['sessions'], [repr(i) for i in sessions_filter])
 
     def test_session_list_get_no_login(self):
         data = {'filter_price': True}
