@@ -17,4 +17,4 @@ class SessionTest(TestCase):
 
     def test_get_show_date(self):
         show_date = f'С {self.session.start_date.day} {months[self.session.start_date.month - 1]} {self.session.start_date.year} года по {self.session.end_date.day} {months[self.session.end_date.month - 1]} {self.session.end_date.year} года'
-        self.assertEqual(self.session.get_show_date(), show_date)
+        self.assertEqual(self.session.get_show_date, show_date)

@@ -4,6 +4,7 @@ from datetime import datetime
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+
 months = [
     'Января',
     'Февраля',
@@ -38,7 +39,6 @@ class Session(models.Model):
     end_time = models.TimeField(verbose_name='Время окончания')
     start_date = models.DateField(verbose_name='Дата начала')
     end_date = models.DateField(verbose_name='Дата окончания')
-    show_date = models.CharField(max_length=50, verbose_name='Дата показа', blank=True)
     price = models.PositiveSmallIntegerField(verbose_name='Цена билета')
     status = models.BooleanField(default=True, verbose_name='Статус', blank=True)
 

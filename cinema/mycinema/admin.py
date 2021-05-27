@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext, gettext_lazy as _
@@ -12,6 +11,7 @@ def change_status(modeladmin, request, queryset):
 
 
 class MyUserAdmin(UserAdmin):
+    empty_value_display = 'None'
     actions = [change_status]
     fieldsets = (
         (_('Profile'), {'fields': ('username', 'password', 'total_price')}),
@@ -36,9 +36,14 @@ class CinemaHallAdmin(admin.ModelAdmin):
 
 
 class SessionAdmin(admin.ModelAdmin):
-    exclude = ('show_date',)
+
+    def get_show_date_for_label(self, obj):
+        return obj.get_show_date
+
+    get_show_date_for_label.short_description = 'Дата показа'
+
     search_fields = ('price',)
-    list_display = ('hall', 'show_date', 'price', 'status')
+    list_display = ('hall', 'get_show_date_for_label', 'price', 'status')
     list_filter = ('status',)
 
 
