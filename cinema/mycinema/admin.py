@@ -37,13 +37,8 @@ class CinemaHallAdmin(admin.ModelAdmin):
 
 class SessionAdmin(admin.ModelAdmin):
 
-    def get_show_date_for_label(self, obj):
-        return obj.get_show_date
-
-    get_show_date_for_label.short_description = 'Дата показа'
-
     search_fields = ('price',)
-    list_display = ('hall', 'get_show_date_for_label', 'price', 'status')
+    list_display = ('hall', 'get_show_date', 'price', 'status')
     list_filter = ('status',)
 
 

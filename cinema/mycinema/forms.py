@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from mycinema.models import MyUser, CinemaHall, Session, Ticket
 from django import forms
+from django.utils.translation import gettext, gettext_lazy as _
 
 
 class MyUserCreationForm(UserCreationForm):
@@ -34,11 +35,11 @@ class CreateSessionForm(forms.ModelForm):
         start_date = cleaned_data['start_date']
         end_date = cleaned_data['end_date']
         if start_time >= end_time or start_date >= end_date:
-            self.add_error('start_time', 'Начало не может быть больше конца')
+            self.add_error('start_time', _('The beginning cannot be greater than the end'))
         sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date, start_date__lte=end_date)
         if sessions_that_overlap:
             if sessions_that_overlap.filter(end_time__gte=start_time, start_time__lte=end_time):
-                self.add_error('hall', 'Зал в это время занят')
+                self.add_error('hall', _('The hall is busy at this time'))
 
 
 class QuantityTicketForm(forms.ModelForm):
@@ -46,7 +47,7 @@ class QuantityTicketForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ('quantity', )
+        fields = ('quantity',)
 
 
 class UpdateSessionForm(forms.ModelForm):
@@ -57,7 +58,7 @@ class UpdateSessionForm(forms.ModelForm):
             'start_time': forms.TimeInput(attrs={'type': 'time'}),
             'end_time': forms.TimeInput(attrs={'type': 'time'}),
             'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date':forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def clean(self):
@@ -69,13 +70,14 @@ class UpdateSessionForm(forms.ModelForm):
         start_date = cleaned_data['start_date']
         end_date = cleaned_data['end_date']
         if start_time >= end_time or start_date >= end_date:
-            self.add_error('start_time', 'Начало не может быть больше конца')
-        sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date, start_date__lte=end_date).exclude(id=curent_session.pk)
+            self.add_error('start_time', _('The beginning cannot be greater than the end'))
+        sessions_that_overlap = hall.sessions.filter(status=True, end_date__gte=start_date,
+                                                     start_date__lte=end_date).exclude(id=curent_session.pk)
         if sessions_that_overlap:
             if sessions_that_overlap.filter(status=True, end_time__gte=start_time, start_time__lte=end_time):
-                self.add_error('hall', 'Зал в это время занят')
+                self.add_error('hall', _('The hall is busy at this time'))
 
 
 class FilterForm(forms.Form):
-    filter_price = forms.BooleanField(label='Фильтрация по ценам', required=False)
-    filter_start_time = forms.BooleanField(label='Фильтрация по началу', required=False)
+    filter_price = forms.BooleanField(label=_('Filter by price'), required=False)
+    filter_start_time = forms.BooleanField(label=_('Filter by start'), required=False)

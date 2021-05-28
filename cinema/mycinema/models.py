@@ -1,53 +1,56 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from datetime import datetime
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
+from django.utils.translation import gettext, gettext_lazy as _
 
 
 months = [
-    'Января',
-    'Февраля',
-    'Марта',
-    'Апреля',
-    'Майа',
-    'Июня',
-    'Июля',
-    'Августа',
-    'Сентября',
-    'Октября',
-    'Ноября',
-    'Декабря'
+    _('January'),
+    _('February'),
+    _('March'),
+    _('April'),
+    _('May'),
+    _('June'),
+    _('July'),
+    _('August'),
+    _('September'),
+    _('October'),
+    _('November'),
+    _('December')
 ]
 
 
 class MyUser(AbstractUser):
-    total_price = models.PositiveIntegerField(verbose_name='Сумма', default=0, blank=True)
+    total_price = models.PositiveIntegerField(verbose_name=_('Amount'), default=0, blank=True)
 
 
 class CinemaHall(models.Model):
-    name = models.CharField(max_length=50, verbose_name='Имя зала')
-    size = models.PositiveSmallIntegerField(verbose_name='Размер зала')
+    name = models.CharField(max_length=50, verbose_name=_('Hall name'))
+    size = models.PositiveSmallIntegerField(verbose_name=_('Hall size'))
 
     def __str__(self):
         return self.name
 
 
 class Session(models.Model):
-    hall = models.ForeignKey(CinemaHall, on_delete=models.CASCADE, related_name='sessions', verbose_name='Зал')
-    start_time = models.TimeField(verbose_name='Время начала')
-    end_time = models.TimeField(verbose_name='Время окончания')
-    start_date = models.DateField(verbose_name='Дата начала')
-    end_date = models.DateField(verbose_name='Дата окончания')
-    price = models.PositiveSmallIntegerField(verbose_name='Цена билета')
-    status = models.BooleanField(default=True, verbose_name='Статус', blank=True)
+    hall = models.ForeignKey(CinemaHall, on_delete=models.CASCADE, related_name='sessions', verbose_name=_('Hall'))
+    start_time = models.TimeField(verbose_name=_('Start time'))
+    end_time = models.TimeField(verbose_name=_('End time'))
+    start_date = models.DateField(verbose_name=_('Start date'))
+    end_date = models.DateField(verbose_name=_('End date'))
+    price = models.PositiveSmallIntegerField(verbose_name=_('Ticket price'))
+    status = models.BooleanField(default=True, verbose_name=_('Status'), blank=True)
 
     @property
     def get_show_date(self):
         return f'С {self.start_date.day} ' \
                f'{months[self.start_date.month - 1]} ' \
-               f'{self.start_date.year} года по {self.end_date.day} ' \
-               f'{months[self.end_date.month - 1]} {self.end_date.year} года'
+               f'{self.start_date.year} ' \
+               f"{_('of the year to ')}" \
+               f'{self.end_date.day} ' \
+               f'{months[self.end_date.month - 1]} {self.end_date.year} ' \
+               f"{_('of the year')}"
 
     def check_status(self):
         if self.end_date < timezone.now().date():
@@ -67,16 +70,16 @@ class Ticket(models.Model):
         MyUser,
         on_delete=models.CASCADE,
         related_name='purchased_tickets',
-        verbose_name='Покупатель', blank=True
+        verbose_name=_('Purchase'), blank=True
     )
     session = models.ForeignKey(
         Session,
         on_delete=models.CASCADE,
         related_name='session_tickets',
-        verbose_name='Сеанс',
+        verbose_name=_('Session'),
         blank=True
     )
-    quantity = models.PositiveSmallIntegerField(verbose_name='Количество билетов')
+    quantity = models.PositiveSmallIntegerField(verbose_name=_('Quantity ticket'))
 
     def __str__(self):
         return f'Ticket {self.id}'

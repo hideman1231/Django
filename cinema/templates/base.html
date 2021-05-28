@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+{% load i18n %}
 <html>
 <head>
 </head>
 <body>
-    {% block content %}
-    {% endblock %}
-    <div>
-        <a href="{% url 'index' %}">Главная страница</a>
-    </div>
+{% block content %}
+{% endblock %}
+<div>
+    <a href="{% url 'index' %}">{% translate 'Home page' %}</a>
+</div>
 </body>
 </html>
