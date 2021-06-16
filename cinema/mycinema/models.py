@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _, ngettext_lazy
 
 
 months = [
@@ -26,6 +26,11 @@ class MyUser(AbstractUser):
 
 
 class CinemaHall(models.Model):
+
+    class Meta:
+        verbose_name = _('Hall')
+        verbose_name_plural = _('Halls')
+
     name = models.CharField(max_length=50, verbose_name=_('Hall name'))
     size = models.PositiveSmallIntegerField(verbose_name=_('Hall size'))
 
@@ -34,6 +39,11 @@ class CinemaHall(models.Model):
 
 
 class Session(models.Model):
+
+    class Meta:
+        verbose_name = _('Session')
+        verbose_name_plural = _('Sessions')
+
     hall = models.ForeignKey(CinemaHall, on_delete=models.CASCADE, related_name='sessions', verbose_name=_('Hall'))
     start_time = models.TimeField(verbose_name=_('Start time'))
     end_time = models.TimeField(verbose_name=_('End time'))
@@ -66,6 +76,11 @@ class Session(models.Model):
 
 
 class Ticket(models.Model):
+
+    class Meta:
+        verbose_name = _('Ticket')
+        verbose_name_plural = _('Tickets')
+
     customer = models.ForeignKey(
         MyUser,
         on_delete=models.CASCADE,

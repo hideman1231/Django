@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block titles %}Профиль{% endblock %}
 
 {% block content %}
     <h1>{{ user }}
     <h1>
-    <h3>Всего потрачено:{{ user.total_price }}
+    <h3>{% translate 'Total spent' %}:{{ user.total_price }}
     <h3>
     {% for ticket in object_list %}
         <div>
-            Зал: {{ ticket.session.hall.name }} |
-            Сеанс: {{ ticket.session }} |
-            Цена: {{ ticket.session.price }} |
-            Билетов: {{ ticket.quantity }} |
-            Дата показа: {{ ticket.session.get_show_date }}
+            {% translate 'Hall' %}: {{ ticket.session.hall.name }} |
+            {% translate 'Session' %}: {{ ticket.session }} |
+            {% translate 'Ticket price' %}: {{ ticket.session.price }} |
+            {% translate 'Ticket' %}: {{ ticket.quantity }} |
+            {% translate 'Show date' %}: {{ ticket.session.get_show_date }}
         </div>
     {% endfor %}
     {% if page_obj.paginator.num_pages > 1 %}

@@ -141,7 +141,7 @@ class UpdateCinemaHallView(PermissionRequiredMixin, UserPassesTestMixin, UpdateV
         sessions = self.get_object().sessions.filter(status=True)
         if sessions:
             for session in sessions:
-                if session.session_tickets.first():
+                if session.session_tickets.distinct():
                     return False
         return True
 
@@ -156,7 +156,7 @@ class UpdateSessionView(PermissionRequiredMixin, UserPassesTestMixin, UpdateView
 
     def test_func(self):
         session = self.get_object()
-        if session.session_tickets.first():
+        if session.session_tickets.distinct():
             return False
         return True
 

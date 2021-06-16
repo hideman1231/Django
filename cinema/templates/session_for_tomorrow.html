@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
 {% load subtract %}
+{% load i18n %}
 {% block titles %}Сеансы на завтра{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
-        {{user}}
-        <a href="{% url 'logout' %}">Выйти</a>
-        <a href="{% url 'purchases' %}">Покупки</a>
+        {{ user }}
+        <a href="{% url 'logout' %}">{% translate 'Logout' %}</a>
+        <a href="{% url 'purchases' %}">{% translate 'My purchase' %}</a>
         {% if user.is_superuser %}
-            <a href="{% url 'create_cinema_hall' %}">Создать зал</a>
-            <a href="{% url 'create_session' %}">Создать сеанс</a>
+            <a href="{% url 'create_cinema_hall' %}">{% translate 'Create hall' %}</a>
+            <a href="{% url 'create_session' %}">{% translate 'Create session' %}</a>
         {% endif %}
         <div>
             <form>
-                {{filter}}
-                <input type="submit" value="Фильтровать">
+                {{ filter }}
+                <input type="submit" value="{% translate 'filter' %}">
             </form>
         </div>
     {% endif %}
@@ -22,32 +23,33 @@
         <div>
             <form method="post" action="{% url 'create_ticket' %}">
                 {% csrf_token %}
-                <p>Зал: {{session.hall.name}} 
-                {% if user.is_superuser %}
-                    <a href="{% url 'update_cinema_hall' session.hall.pk %}">Изменить зал</a><p><br>
-                {% endif %}
-                Свободных мест: {{ session.hall.size|sub:session.total }}<br>
-                Время: {{session.start_time.hour}}:{{session.start_time.minute}} - {{session.end_time.hour}}:{{session.end_time.minute}}<br>
-                Дата показа: {{session.show_date}}<br>
-                Цена билета: {{session.price}}<br>
-                {% if user.is_authenticated %}
-                    {{quantity.quantity}}
-                    <input type="hidden" name="session" value='{{session.pk}}'>
-                    <input type="submit" value="Купить">
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'update_session' session.pk %}">Изменить сеанс</a>
-                {% endif %}
+                <p>Зал: {{ session.hall.name }}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'update_cinema_hall' session.hall.pk %}">{% translate 'Change hall' %}</a><p>
+                        <br>
+                    {% endif %}
+                    {% translate 'Free places' %}: {{ session.hall.size|sub:session.total }}<br>
+                    {% translate 'Time' %}: {{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}<br>
+                    {% translate 'Show date' %}: {{ session.get_show_date }}<br>
+                    {% translate 'Ticket price' %}: {{ session.price }}<br>
+                    {% if user.is_authenticated %}
+                        {{ quantity.quantity }}
+                        <input type="hidden" name="session" value='{{ session.pk }}'>
+                        <input type="submit" value="{% translate 'Buy' %}">
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'update_session' session.pk %}">{% translate 'Change session' %}</a>
+                    {% endif %}
             </form>
         </div>
     {% endfor %}
     {% if page_obj.paginator.num_pages > 1 %}
         {% for num in page_obj.paginator.page_range %}
             {% ifequal num page_obj.number %}
-            <span class="current"><b>{{ num }}</b></span>
+                <span class="current"><b>{{ num }}</b></span>
             {% else %}
-            <a href="?page={{ num }}"> {{ num }}</a>
-            {% endifequal %} 
+                <a href="?page={{ num }}"> {{ num }}</a>
+            {% endifequal %}
         {% endfor %}
     {% endif %}
 {% endblock %}
