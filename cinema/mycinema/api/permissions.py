@@ -9,7 +9,7 @@ class CustomCinemaHallUpdatePermisson(permissions.BasePermission):
             sessions = obj.sessions.filter(status=True)
             if sessions:
                 for session in sessions:
-                    if session.session_tickets.distinct():
+                    if session.session_tickets.exists():
                         return False
         return True
 
@@ -22,7 +22,7 @@ class CustomSessionUpdatePermisson(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method in ['PATCH', 'PUT']:
-            if obj.session_tickets.distinct():
+            if obj.session_tickets.exists():
                 return False
         return True
 
